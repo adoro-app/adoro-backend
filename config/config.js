@@ -9,9 +9,9 @@ module.exports =
 		"DATABASE":"adoro"
 	},
 	"MYSQL_CREDENTIAL_PRODUCTION":{
-		"HOST":"localhost",
+		"HOST":"13.127.108.52",
 		"USER":"root",
-		"PASSWORD":"",
+		"PASSWORD":"root",
 		"DATABASE":"adoro"
 	},
 	"aws_bucket_name"	 : 'adoro/userimage',

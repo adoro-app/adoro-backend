@@ -1,14 +1,13 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
-package.json
-package-lock.json
+
 # compiled output
 /dist
 /tmp
 /out-tsc
 /nohup.out
 /node_modules
-/config/config.js
+
 # IDEs and editors
 /.idea
 .project
@@ -46,5 +45,3 @@ yarn-error.log
 Thumbs.db
 
 # Config Folder
-config/connection.js
-config/config.js

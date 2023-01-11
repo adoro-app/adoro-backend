@@ -14,6 +14,7 @@ switch (_SERVER) {
             host: config.MYSQL_CREDENTIAL_PRODUCTION.HOST,
             user: config.MYSQL_CREDENTIAL_PRODUCTION.USER,
             password: config.MYSQL_CREDENTIAL_PRODUCTION.PASSWORD,
+            port : config.MYSQL_CREDENTIAL_PRODUCTION.PORT,
             database: config.MYSQL_CREDENTIAL_PRODUCTION.DATABASE,
             dateStrings: true
         });
@@ -39,7 +40,7 @@ switch (_SERVER) {
         break;
 }
 
-
+console.log(dbConnection)
 dbConnection.connect((err) => {
     if (err) throw err;
     console.log("Connected!");

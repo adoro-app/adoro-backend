@@ -1,6 +1,8 @@
 const common  = require('../../common/common');
 const config = require('../../config/config');
 const axios = require('axios');
+const jwt = require('jsonwebtoken');
+const response = require('../../constant/response');
 exports.userSignUp = async (req,res) =>
 {
   try{
@@ -86,11 +88,14 @@ exports.validateOTP = async (req,res) =>
       if (mobileNo != "" && mobileNo.length == 10){ 
        
         let GetRecords = await common.GetRecords(config.userTable, 'id, otp', `mobileNo =${mobileNo}` )
-        console.log(GetRecords.data)
+        let token =  jwt.sign({ id: GetRecords.data[0].id }, `'${config.JwtSupersecret}'`, {
+          // expiresIn: 86400 //parseInt(config.JwtTokenExpiresIn)
+      });
         if(GetRecords.data[0].otp == otp){
           let response = {
             status : 200,
-            msg : 'Successful'
+            msg : 'Successful',
+            token: token
           }
           res.send(response)
         }else{

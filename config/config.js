@@ -22,6 +22,9 @@ module.exports =
 	},
 	"api_key" : "euqraM9b0125947a366fb9e5",
 	"templateID": "1707164905605342663",
-	"PEID": "1701164723775936270"
+	"PEID": "1701164723775936270",
+	"JwtTokenExpiresIn"  : 86400, /* expires in 24 hours */
+	"JwtSupersecret"     : 'supersecret'
+	
 }
 

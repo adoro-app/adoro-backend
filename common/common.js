@@ -40,7 +40,7 @@ switch (_SERVER) {
         break;
 }
 
-console.log(dbConnection)
+// console.log(dbConnection)
 dbConnection.connect((err) => {
     if (err) throw err;
     console.log("Connected!");

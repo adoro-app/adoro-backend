@@ -2,6 +2,7 @@
 module.exports =
 {
 	"userTable"     	 : 'users',
+	"memeCategoriesTable" : 'meme_categories',
 	"MYSQL_CREDENTIAL_DEVELOPMENT":{
 		"HOST":"localhost",
 		"USER":"root",

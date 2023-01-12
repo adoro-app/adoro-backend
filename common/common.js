@@ -4,7 +4,7 @@ const config = require('../config/config');
 const responseCode = require('../constant/response');
 const jwt = require('jsonwebtoken');
 const _ = require('underscore');
-const _SERVER = 'Production';
+const _SERVER = 'Development';
 
 
 
@@ -53,12 +53,12 @@ module.exports =
             try {
                 return new Promise(async (resolve, reject) => {
                     let responseObj = {};
-                    // if (_.isEmpty(fields)) {
-                    //     fields = '*';
-                    // }
-                    // if (_.isEmpty(where)) {
-                    //     where = 'id != ""';
-                    // }
+                    if (_.isEmpty(fields)) {
+                        fields = '*';
+                    }
+                    if (_.isEmpty(where)) {
+                        where = 'id != ""';
+                    }
                     // if (!_.isEmpty(where)) {
                     //     where = 'id =' + where;
                     // }

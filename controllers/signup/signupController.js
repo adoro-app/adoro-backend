@@ -19,7 +19,9 @@ exports.userSignUp = async (req,res) =>
           otp : generateOtp
         }
         let addRecords = await common.AddRecords(config.userTable, insertObj )
-        // let sendMsg = await axios.get('https://dog.ceo/api/breeds/list/all')
+        let message = `Hey Creator, Your OTP for signup is ${generateOtp}. Share our app with everyone, not this OTP. Visit adoro.social THINK ELLPSE`
+        let url = `https://sms.prowtext.com/sendsms/sendsms.php?apikey=${config.api_key}&type=TEXT&mobile=${mobileNo}&sender=ELLPSE&PEID=${config.PEID}&TemplateId=${config.templateID}&message=${message}`
+        let sendMsg = await axios.get(url)
         let response = {
           status : 200,
           msg : 'OTP Sent Successfully'

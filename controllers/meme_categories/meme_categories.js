@@ -23,7 +23,7 @@ exports.memeCategories = async (req, res) => {
             await res.send(response);
         }
     
-        }catch(err){
-        await res.send(error);
-        }
+    }catch(err){
+    await res.send(error);
+    }
   }

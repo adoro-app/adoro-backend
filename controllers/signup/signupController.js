@@ -11,22 +11,32 @@ exports.userSignUp = async (req,res) =>
       let email = (req.body.email) ? req.body.email : ""
       
       if (mobileNo != "" && mobileNo.length == 10){ 
-        let generateOtp = Math.floor(100000 + Math.random() * 900000)
-        let insertObj = {
-          mobileNo : mobileNo,
-          username : username,
-          email : email,
-          otp : generateOtp
+        let GetRecords = await common.GetRecords(config.userTable, 'id', `mobileNo =${mobileNo}` )
+        if(GetRecords.data.length > 0) {
+          let response = {
+            status : 200,
+            msg : 'MobileNo Already Registered, Please login to countinue.'
+          }
+          res.send(response)
+        }else{
+          let generateOtp = Math.floor(100000 + Math.random() * 900000)
+          let insertObj = {
+            mobileNo : mobileNo,
+            username : username,
+            email : email,
+            otp : generateOtp
+          }
+          let addRecords = await common.AddRecords(config.userTable, insertObj )
+          let message = `Hey Creator, Your OTP for signup is ${generateOtp}. Share our app with everyone, not this OTP. Visit adoro.social THINK ELLPSE`
+          let url = `https://sms.prowtext.com/sendsms/sendsms.php?apikey=${config.api_key}&type=TEXT&mobile=${mobileNo}&sender=ELLPSE&PEID=${config.PEID}&TemplateId=${config.templateID}&message=${message}`
+          let sendMsg = await axios.get(url)
+          let response = {
+            status : 200,
+            msg : 'OTP Sent Successfully'
+          }
+          res.send(response)
         }
-        let addRecords = await common.AddRecords(config.userTable, insertObj )
-        let message = `Hey Creator, Your OTP for signup is ${generateOtp}. Share our app with everyone, not this OTP. Visit adoro.social THINK ELLPSE`
-        let url = `https://sms.prowtext.com/sendsms/sendsms.php?apikey=${config.api_key}&type=TEXT&mobile=${mobileNo}&sender=ELLPSE&PEID=${config.PEID}&TemplateId=${config.templateID}&message=${message}`
-        let sendMsg = await axios.get(url)
-        let response = {
-          status : 200,
-          msg : 'OTP Sent Successfully'
-        }
-        res.send(response)
+        
       }else{
         let response = {
           status : 200,

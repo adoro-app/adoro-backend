@@ -4,7 +4,7 @@ const config = require('../config/config');
 const responseCode = require('../constant/response');
 const jwt = require('jsonwebtoken');
 const _ = require('underscore');
-const _SERVER = 'Development';
+const _SERVER = 'Production';
 
 
 

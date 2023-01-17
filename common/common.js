@@ -230,9 +230,11 @@ module.exports =
        
         checkToken: async (param) => {
             return new Promise(async (resolve, reject) => {
+                console.log(param.token)
                 jwt.verify(param.token, `'${config.JwtSupersecret}'`, async (err, decoded) => {
-
-                    if (decoded && decoded.id == param.id) {
+                    // console.log(err)
+                    // console.log(decoded)
+                    if (decoded && decoded.id) {
                         resolve(decoded);
                     }
                     else {

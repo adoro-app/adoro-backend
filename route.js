@@ -24,5 +24,8 @@ router.post("/validateOTP",  (req, res) => {
 router.get("/meme_categories",  (req, res) => {
     meme.memeCategories(req,res)
 });
+router.post("/user_category",  (req, res) => {
+    meme.userCategory(req,res)
+});
 
 module.exports = router;

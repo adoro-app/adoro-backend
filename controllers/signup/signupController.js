@@ -101,7 +101,7 @@ exports.validateOTP = async (req,res) =>
        
         let GetRecords = await common.GetRecords(config.userTable, 'id, otp', `mobileNo =${mobileNo}` )
         let token =  jwt.sign({ id: GetRecords.data[0].id }, `'${config.JwtSupersecret}'`, {
-          // expiresIn: 86400 //parseInt(config.JwtTokenExpiresIn)
+          expiresIn: 864000 //parseInt(config.JwtTokenExpiresIn)
       });
         if(GetRecords.data[0].otp == otp){
           let response = {

@@ -1,3 +1,4 @@
+const { checkToken } = require('../../common/common');
 const common  = require('../../common/common');
 const config = require('../../config/config');
 
@@ -16,7 +17,7 @@ exports.memeCategories = async (req, res) => {
         
         }else{
             let response = {
-            status : 200,
+            status : 500,
             msg : 'No meme category found.',
             data : getMemeCategories.data
             }
@@ -31,10 +32,11 @@ exports.memeCategories = async (req, res) => {
     
     try{
         let token = req.headers;
-        let category_id = req.body.selected_category_ids;
+        let category_id = (req.body.selected_category_ids) ? req.body.selected_category_ids : '';
         let checkTokenFromHeader = await common.checkToken(req.headers);
         
         if(checkTokenFromHeader.id && category_id.length > 0){
+            
             for (let i = 0; i < category_id.length; i++ ){
                 let addObj = {
                     user_id : checkTokenFromHeader.id,
@@ -44,6 +46,11 @@ exports.memeCategories = async (req, res) => {
                 let insertRecord = await common.AddRecords(config.userMemeCategories, addObj);
 
             }
+            let updateObj = {
+                isCategorySelected : 'true'
+            }
+            let updateRecord = await common.UpdateRecords('users', updateObj, checkTokenFromHeader.id)
+            
             let response = {
                 status : 200,
                 msg : "user categories added successfully"

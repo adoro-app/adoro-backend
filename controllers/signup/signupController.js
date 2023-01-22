@@ -14,7 +14,7 @@ exports.userSignUp = async (req,res) =>
         let GetRecords = await common.GetRecords(config.userTable, 'id', `mobileNo =${mobileNo}` )
         if(GetRecords.data.length > 0) {
           let response = {
-            status : 200,
+            status : 500,
             msg : 'MobileNo Already Registered, Please login to countinue.'
           }
           res.send(response)
@@ -39,7 +39,7 @@ exports.userSignUp = async (req,res) =>
         
       }else{
         let response = {
-          status : 200,
+          status : 500,
           msg : 'Please provide valid mobile number'
         }
         res.send(response)
@@ -103,7 +103,7 @@ exports.validateOTP = async (req,res) =>
         let token =  jwt.sign({ id: GetRecords.data[0].id }, `'${config.JwtSupersecret}'`, {
           expiresIn: 864000 //parseInt(config.JwtTokenExpiresIn)
       });
-      console.log(GetRecords)
+      
         if(GetRecords.data[0].otp == otp){
           let response = {
             status : 200,

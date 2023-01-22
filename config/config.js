@@ -17,7 +17,8 @@ module.exports =
 		"PORT" : 3306,
 		"DATABASE":"adoro"
 	},
-	"aws_bucket_name"	 : 'adoro/userimage',
+	"aws_bucket_name_user"	 : 'adoro/userimage',
+	"aws_bucket_name_post" : 'adoro/post',
 	"AWS_CREDENTIAL"     :{
 		"accessKeyId":"AKIA4EZQCBCZLYFKLJGU",
 		"secretAccessKey":"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"

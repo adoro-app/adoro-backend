@@ -4,7 +4,8 @@ const config = require('../config/config');
 const responseCode = require('../constant/response');
 const jwt = require('jsonwebtoken');
 const _ = require('underscore');
-const _SERVER = 'Production';
+const { param } = require('../route');
+const _SERVER = 'Development';
 
 
 
@@ -87,35 +88,7 @@ module.exports =
                 return await error;
             }
         },
-        GetAppConfRecords: async () => {
-            try {
-
-                return new Promise(async (resolve, reject) => {
-                    let responseObj = {};
-                    let sql = `SELECT app.id as app_id, app.name, app.package_name, app.client_id, app.platform_id, config.id as config_id FROM bi_app as app, bi_config as config WHERE app.id=config.app_id`;
-                    try {
-                        dbConnection.query(sql, async (err, result) => {
-                            if (err) {
-
-                                reject(responseCode.dbErrorResponse(err));
-                            }
-                            if (result && result.length > 0) {
-                                responseObj = responseCode.fetchRecordSuccessResponse(result);
-                                resolve(responseObj);
-                            } else {
-                                responseObj = responseCode.recordNotFoundResponse();
-                                resolve(responseObj)
-                            }
-
-                        })
-                    } catch (error) {
-                        return await error;
-                    }
-                });
-            } catch (error) {
-                return await error;
-            }
-        },
+        
         AddRecords: async (table, addObject) => {
 
             try {
@@ -159,7 +132,6 @@ module.exports =
                             }
                             else (!_.isEmpty(result))
                             {
-
                                 responseObj = await responseCode.recordUpdatedSuccessResponse(result);
                             }
                             resolve(responseObj);
@@ -230,7 +202,7 @@ module.exports =
        
         checkToken: async (param) => {
             return new Promise(async (resolve, reject) => {
-                console.log(param.token)
+              
                 jwt.verify(param.token, `'${config.JwtSupersecret}'`, async (err, decoded) => {
                     // console.log(err)
                     // console.log(decoded)
@@ -242,5 +214,33 @@ module.exports =
                     }
                 })
             })
+        },
+        
+    customQuery: async (sql) => {
+        try {
+            return new Promise(async (resolve, reject) => {
+                let responseObj = {};
+                
+                try {
+                    dbConnection.query(sql, async (err, result) => {
+                        if (err) {
+                            reject(responseCode.dbErrorResponse(err));
+                        }
+                        if (result && result.length > 0) {
+                            
+                            responseObj = responseCode.fetchRecordSuccessResponse(result);
+                            resolve(responseObj);
+                        } else {
+                            responseObj = responseCode.recordNotFoundResponse();
+                            resolve(responseObj)
+                        }
+                    })
+                } catch (error) {
+                    return await error;
+                }
+            });
+        } catch (error) {
+            return await error;
         }
-    }
+    },
+}

@@ -5,7 +5,7 @@ const responseCode = require('../constant/response');
 const jwt = require('jsonwebtoken');
 const _ = require('underscore');
 const { param } = require('../route');
-const _SERVER = 'Development';
+const _SERVER = 'Production';
 
 
 

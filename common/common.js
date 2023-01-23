@@ -150,12 +150,15 @@ module.exports =
                     let responseObj = {};
                     let sql = `DELETE FROM ${table} WHERE ${where}`;
                     try {
+                        console.log(sql)
                         dbConnection.query(sql, async (err, result) => {
                             if (err) {
+                                console.log(err)
                                 reject(responseCode.dbErrorResponse(err));
                             }
                             else (!_.isEmpty(result))
                             {
+                                console.log(result)
                                 responseObj = await responseCode.recordDeleteSuccessResponse(result);
                             }
                             resolve(responseObj);

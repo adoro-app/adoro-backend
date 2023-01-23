@@ -46,4 +46,10 @@ router.post("/like",  (req, res) => {
 router.post("/createPost", upload.single('content_url'), (req, res) => {
     post.createPost(req,res)
 });
+router.post("/deleteLike",  (req, res) => {
+    post.deleteLike(req,res)
+});
+router.post("/getPostLikesUsers",  (req, res) => {
+    post.getPostLikesUsers(req,res)
+});
 module.exports = router;

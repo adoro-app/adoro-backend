@@ -196,6 +196,67 @@ exports.like = async (req, res)=>{
          
     }
 
+    exports.deleteLike = async (req, res)=>{
+        try{
+           
+            let checkToken = await common.checkToken(req.headers);
+            
+            if(checkToken){
+                let post_id = req.body.post_id;
+                let deleteLike = await common.deleteRecords('likes', `user_id = ${checkToken.id} AND post_id = ${post_id}`);
+                
+                if (deleteLike){
+                    let response = {
+                        status : 200,
+                        msg : "Like deleted successfully."
+                    }
+                    res.send(response)
+                }else{
+                    let response = {
+                        status : 500,
+                        msg : "Something went wrong"
+                    }
+                    res.send(response)
+                }
+            }
+                
+        }catch(err){
+            throw err;
+        }
+         
+    }
+
+    exports.getPostLikesUsers = async (req, res)=>{
+        try{
+           
+            let checkToken = await common.checkToken(req.headers);
+            
+            if(checkToken){
+                let post_id = req.body.post_id;
+                let sql = `SELECT users.id, users.username, users.image FROM likes LEFT JOIN users ON 
+                likes.user_id = users.id WHERE likes.post_id = ${post_id}`
+                let getUser = await common.customQuery(sql);
+                if (getUser.data.length > 0){
+                    let response = {
+                        status : 200,
+                        msg : "Data Available",
+                        data : getUser.data
+                    }
+                    res.send(response)
+                }else{
+                    let response = {
+                        status : 500,
+                        msg : "No data available"
+                    }
+                    res.send(response)
+                }
+            }
+                
+        }catch(err){
+            throw err;
+        }
+         
+    }
 
 
   

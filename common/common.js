@@ -66,9 +66,10 @@ module.exports =
                     let sql = `SELECT ${(fields)} FROM ${table} WHERE ${where}`;
                     
                     try {
+
                         dbConnection.query(sql, async (err, result) => {
                             if (err) {
-
+                                console.log(err)
                                 reject(responseCode.dbErrorResponse(err));
                             }
                             if (result && result.length > 0) {

@@ -258,6 +258,35 @@ exports.like = async (req, res)=>{
          
     }
 
+    exports.getAllPostByUser = async (req, res)=>{
+        try{
+           
+            let checkToken = await common.checkToken(req.headers);
+            
+            if(checkToken){
+                let getUser = await common.GetRecords('post','id, content, content_type, content_url, created_on', `user_id = ${checkToken.id}`);
+                if (getUser.data.length > 0){
+                    let response = {
+                        status : 200,
+                        msg : "Data Available",
+                        data : getUser.data
+                    }
+                    res.send(response)
+                }else{
+                    let response = {
+                        status : 500,
+                        msg : "No data available"
+                    }
+                    res.send(response)
+                }
+            }
+                
+        }catch(err){
+            throw err;
+        }
+         
+    }
+
 
   
 

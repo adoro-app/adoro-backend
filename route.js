@@ -52,4 +52,7 @@ router.post("/deleteLike",  (req, res) => {
 router.post("/getPostLikesUsers",  (req, res) => {
     post.getPostLikesUsers(req,res)
 });
+router.get("/getAllPostByUser",  (req, res) => {
+    post.getAllPostByUser(req,res)
+});
 module.exports = router;

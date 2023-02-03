@@ -86,7 +86,7 @@ exports.like = async (req, res)=>{
             let datenow = new Date()
             let currentDate = moment(datenow).format('YYYY-MM-DD HH:mm:ss');
             
-            if(checkToken){
+            if(checkToken.id){
                 let getrecord = await common.GetRecords('likes', 'id', `user_id = ${checkToken.id} AND post_id = ${post_id}`)
                 console.log(getrecord)
                 // return false;
@@ -117,6 +117,8 @@ exports.like = async (req, res)=>{
                     res.send(response)
                 }
                 
+            }else{
+                res.send(response.UnauthorizedUser(checkToken))
             }
             // let addRecords = common.AddRecords()
 
@@ -134,7 +136,7 @@ exports.like = async (req, res)=>{
             let datenow = new Date()
             let currentDate = moment(datenow).format('YYYY-MM-DD HH:mm:ss');
             
-            if(checkToken){
+            if(checkToken.id){
                 console.log(req.file)
                 const filestream = fs.createReadStream(req.file.path)
                 const params = {
@@ -177,7 +179,9 @@ exports.like = async (req, res)=>{
                     res.send(response)
                 }
                 })
-           }
+           }else{
+            res.send(response.UnauthorizedUser(checkToken))
+        }
         }catch(err){
             throw err;
         }
@@ -189,7 +193,7 @@ exports.like = async (req, res)=>{
            
             let checkToken = await common.checkToken(req.headers);
             
-            if(checkToken){
+            if(checkToken.id){
                 let post_id = req.body.post_id;
                 let deleteLike = await common.deleteRecords('likes', `user_id = ${checkToken.id} AND post_id = ${post_id}`);
                 
@@ -206,6 +210,8 @@ exports.like = async (req, res)=>{
                     }
                     res.send(response)
                 }
+            }else{
+                res.send(response.UnauthorizedUser(checkToken))
             }
                 
         }catch(err){
@@ -219,7 +225,7 @@ exports.like = async (req, res)=>{
            
             let checkToken = await common.checkToken(req.headers);
             
-            if(checkToken){
+            if(checkToken.id){
                 let post_id = req.body.post_id;
                 let sql = `SELECT users.id, users.username, users.full_name, users.image FROM likes LEFT JOIN users ON 
                 likes.user_id = users.id WHERE likes.post_id = ${post_id}`
@@ -238,6 +244,8 @@ exports.like = async (req, res)=>{
                     }
                     res.send(response)
                 }
+            }else{
+                res.send(response.UnauthorizedUser(checkToken))
             }
                 
         }catch(err){
@@ -251,7 +259,7 @@ exports.like = async (req, res)=>{
            
             let checkToken = await common.checkToken(req.headers);
             
-            if(checkToken){
+            if(checkToken.id){
                 let getUser = await common.GetRecords('post','id, content, content_type, content_url, created_on', `user_id = ${checkToken.id}`);
                 if (getUser.data.length > 0){
                     let response = {
@@ -267,6 +275,8 @@ exports.like = async (req, res)=>{
                     }
                     res.send(response)
                 }
+            }else{
+                res.send(response.UnauthorizedUser(checkToken))
             }
                 
         }catch(err){

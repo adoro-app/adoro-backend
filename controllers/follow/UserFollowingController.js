@@ -19,7 +19,7 @@ exports.sendFollowRequest = async (req, res)=>{
             let datenow = new Date()
             let currentDate = moment(datenow).format('YYYY-MM-DD HH:mm:ss');
             console.log(checkToken)
-            if(checkToken){
+            if(checkToken.id){
                 let addobj ={
                     user_id:checkToken.id,
                     follower_user_id: follower_user_id,
@@ -44,11 +44,7 @@ exports.sendFollowRequest = async (req, res)=>{
                     res.send(response)
                 }
             }else{
-                let response = {
-                    status : 500,
-                    msg : 'UnAuthorized User, Please login to countinue'
-                }
-                res.send(response)
+                res.send(response.UnauthorizedUser(checkToken))
             }
           
         }catch(err){
@@ -63,7 +59,7 @@ exports.sendFollowRequest = async (req, res)=>{
             let datenow = new Date()
             let currentDate = moment(datenow).format('YYYY-MM-DD HH:mm:ss');
             // console.log(checkToken)
-            if(checkToken){
+            if(checkToken.id){
                 let updateObj ={
                   status : 'accepted',
                 }
@@ -84,11 +80,7 @@ exports.sendFollowRequest = async (req, res)=>{
                     res.send(response)
                 }
             }else{
-                let response = {
-                    status : 500,
-                    msg : 'UnAuthorized User, Please login to countinue'
-                }
-                res.send(response)
+                res.send(response.UnauthorizedUser(checkToken))
             }
           
         }catch(err){
@@ -104,7 +96,7 @@ exports.sendFollowRequest = async (req, res)=>{
             let datenow = new Date()
             let currentDate = moment(datenow).format('YYYY-MM-DD HH:mm:ss');
             // console.log(checkToken)
-            if(checkToken){
+            if(checkToken.id){
                 let addRecord = await common.deleteRecords('follower', `id = ${id}` )
                 if(addRecord ){
 
@@ -122,11 +114,7 @@ exports.sendFollowRequest = async (req, res)=>{
                     res.send(response)
                 }
             }else{
-                let response = {
-                    status : 500,
-                    msg : 'UnAuthorized User, Please login to countinue'
-                }
-                res.send(response)
+                res.send(response.UnauthorizedUser(checkToken))
             }
           
         }catch(err){
@@ -139,7 +127,7 @@ exports.sendFollowRequest = async (req, res)=>{
            
             let checkToken = await common.checkToken(req.headers);
             
-            if(checkToken){
+            if(checkToken.id){
                 
                 let sql = `SELECT users.id, users.username, users.full_name, users.image, follower.status FROM follower LEFT JOIN users ON 
                 follower.user_id = users.id WHERE follower.user_id = ${checkToken.id} AND follower.status = 'accepted'`
@@ -158,6 +146,8 @@ exports.sendFollowRequest = async (req, res)=>{
                     }
                     res.send(response)
                 }
+            }else{
+                res.send(response.UnauthorizedUser(checkToken))
             }
                 
         }catch(err){
@@ -171,7 +161,7 @@ exports.sendFollowRequest = async (req, res)=>{
            
             let checkToken = await common.checkToken(req.headers);
             
-            if(checkToken){
+            if(checkToken.id){
                 
                 let sql = `SELECT users.id, users.username, users.full_name, users.image, follower.status FROM follower LEFT JOIN users ON 
                 follower.user_id = users.id WHERE follower.follower_user_id = ${checkToken.id} AND follower.status = 'accepted'`
@@ -190,6 +180,8 @@ exports.sendFollowRequest = async (req, res)=>{
                     }
                     res.send(response)
                 }
+            }else{
+                res.send(response.UnauthorizedUser(checkToken))
             }
                 
         }catch(err){
@@ -202,7 +194,7 @@ exports.sendFollowRequest = async (req, res)=>{
            
             let checkToken = await common.checkToken(req.headers);
             
-            if(checkToken){
+            if(checkToken.id){
                 console.log(checkToken)
                 let sql = `SELECT users.id, users.username, users.full_name, users.image, follower.status FROM follower LEFT JOIN users ON 
                 follower.follower_user_id = users.id WHERE follower.user_id = ${checkToken.id} AND follower.status = 'pending'`
@@ -221,6 +213,8 @@ exports.sendFollowRequest = async (req, res)=>{
                     }
                     res.send(response)
                 }
+            }else{
+                res.send(response.UnauthorizedUser(checkToken))
             }
                 
         }catch(err){

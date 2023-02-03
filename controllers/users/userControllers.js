@@ -82,7 +82,7 @@ exports.upload_profile_pic = async (req, res) => {
     let datenow = new Date()
     let currentDate = moment(datenow).format('YYYY-MM-DD HH:mm:ss');
     
-    if(checkToken){
+    if(checkToken.id){
       console.log(req.file.fieldname)
         const filestream = fs.createReadStream(req.file.path)
         const params = {
@@ -137,7 +137,9 @@ exports.upload_profile_pic = async (req, res) => {
             res.send(response)
         }
         })
-   }
+   }else{
+    res.send(response.UnauthorizedUser(checkToken))
+}
   }catch(err){
       throw err;
   }

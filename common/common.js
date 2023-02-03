@@ -73,6 +73,7 @@ module.exports =
                                 reject(responseCode.dbErrorResponse(err));
                             }
                             if (result && result.length > 0) {
+                                console.log(result)
                                 responseObj = responseCode.fetchRecordSuccessResponse(result);
                                 resolve(responseObj);
                             } else {
@@ -208,14 +209,16 @@ module.exports =
             return new Promise(async (resolve, reject) => {
               
                 jwt.verify(param.token, `'${config.JwtSupersecret}'`, async (err, decoded) => {
+                    
                     if(err){
-                        reject(responseCode.UnauthorizedUser(err));
+                        console.log('=========',err)
+                        resolve(responseCode.UnauthorizedUser(err));
                     }
                     if (decoded && decoded.id) {
                         resolve(decoded);
                     }
                     else {
-                        reject(responseCode.UnauthorizedUser(err));
+                        resolve(responseCode.UnauthorizedUser(err));
                     }
                 })
             })

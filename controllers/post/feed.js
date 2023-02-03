@@ -21,17 +21,20 @@ exports.feed = async (req,res) =>
      let checkToken = await common.checkToken(req.headers);
      if (checkToken)
      {
-        let sqlforgetcategoryId = `SELECT id FROM post_category where category_name = '${category}'`
-        let getData = await common.customQuery(sqlforgetcategoryId);
+        let sqlQryForFeed = '';
+        if (category == 'trending'){
+             sqlQryForFeed = `SELECT l.post_id, p.id, p.content, p.content_type, p.content_url, p.created_on, count(*) as noOfLikes 
+             FROM likes l LEFT JOIN post p ON l.post_id = p.id
+             GROUP BY l.post_id 
+             ORDER BY noOfLikes DESC`
+        }else{
+            sqlQryForFeed = ''
+        }
        
+        let getData = await common.customQuery(sqlQryForFeed);
+    
         if (getData.data.length > 0){
-            let category_id = getData.data[0].id;
-            let sqlforfetchpost = `SELECT * FROM post where category_id = '${category_id}'`;
-            let FetchPost = await common.customQuery(sqlforfetchpost);
-            
-            if(FetchPost.data.length > 0){
-                responseObj = FetchPost.data;
-                
+                responseObj = getData.data;
                 let result = [];
                 for (let i = 0; i < responseObj.length; i++ ){
                     let data = responseObj[i]
@@ -39,17 +42,7 @@ exports.feed = async (req,res) =>
                     result.push(prepareRes) ;
                 }
                 res.send(result)
-
             }else{
-                let res = {
-                    status : 500,
-                    msg:'No post available for selected category'
-                }
-                res.send(res)
-            }
-            
-
-        }else{
             let res = {
                 status : 500,
                 msg:'please select correct category'
@@ -65,12 +58,7 @@ exports.feed = async (req,res) =>
 
 async function fetchData(res, uid){
     return new Promise(async (resolve, reject)=>{
-       
-        let sqlForCount = `SELECT COUNT(*) as noOfLikes FROM likes WHERE post_id = ${res.id}`;
-        let Fetchcount = await common.customQuery(sqlForCount);
-       
-        res['noOfLikes'] = (Fetchcount.data[0].noOfLikes) ? Fetchcount.data[0].noOfLikes : '';
-        let sqlForFetchLikes = `SELECT users.id, users.username, users.image FROM post LEFT JOIN likes ON post.id = likes.post_id LEFT JOIN users on likes.user_id = users.id WHERE post.id = ${res.id}`;
+        let sqlForFetchLikes = `SELECT users.id, users.username, users.full_name, users.image FROM post LEFT JOIN likes ON post.id = likes.post_id LEFT JOIN users on likes.user_id = users.id WHERE post.id = ${res.id}`;
         let FetchLikes = await common.customQuery(sqlForFetchLikes);
         FetchLikes = (FetchLikes.data) ? FetchLikes.data : ''
         res['likedByPeople'] = FetchLikes;
@@ -82,7 +70,7 @@ async function fetchData(res, uid){
             }
 
         }
-        let sqlForFetchUserWhoLikesPost = `SELECT id, username, image  FROM users WHERE id = ${res.user_id}`;
+        let sqlForFetchUserWhoLikesPost = `SELECT id, username, full_name, image  FROM users WHERE id = ${res.id}`;
         let FetchUser = await common.customQuery(sqlForFetchUserWhoLikesPost);
         res['author'] = FetchUser.data
         resolve(res)
@@ -233,7 +221,7 @@ exports.like = async (req, res)=>{
             
             if(checkToken){
                 let post_id = req.body.post_id;
-                let sql = `SELECT users.id, users.username, users.image FROM likes LEFT JOIN users ON 
+                let sql = `SELECT users.id, users.username, users.full_name, users.image FROM likes LEFT JOIN users ON 
                 likes.user_id = users.id WHERE likes.post_id = ${post_id}`
                 let getUser = await common.customQuery(sql);
                 if (getUser.data.length > 0){

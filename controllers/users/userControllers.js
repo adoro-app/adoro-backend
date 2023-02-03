@@ -45,6 +45,7 @@ exports.updateUserDetails = async (req, res) => {
     
     let updateObj = {
       userName : (reqBody.userName) ? reqBody.userName : '', 
+      full_name : (reqBody.full_name) ? reqBody.full_name : '',
       bankName : (reqBody.bankName) ? reqBody.bankName : '',
       beneficiaryName : (reqBody.beneficiaryName) ? reqBody.beneficiaryName : '', 
       accountNumber : (reqBody.accountNumber) ? reqBody.accountNumber : '',

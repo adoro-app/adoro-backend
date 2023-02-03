@@ -6,6 +6,7 @@ const config    = require('./config/config');
 const signup    = require('./controllers/signup/signupController');
 const User      = require('./controllers/users/userControllers');
 const meme      = require('./controllers/meme_categories/meme_categories');
+const follow    = require('./controllers/follow/UserFollowingController');
 const post      = require('./controllers/post/feed')
 const multer    = require('multer');
 const upload    = multer({dest : 'uploads/'});
@@ -54,5 +55,26 @@ router.post("/getPostLikesUsers",  (req, res) => {
 });
 router.get("/getAllPostByUser",  (req, res) => {
     post.getAllPostByUser(req,res)
+});
+router.post("/sendFollowRequest",  (req, res) => {
+    follow.sendFollowRequest(req,res)
+});
+router.post("/acceptFollowRequest",  (req, res) => {
+    follow.acceptFollowRequest(req,res)
+});
+router.post("/deleteFollowRequest",  (req, res) => {
+    follow.deleteFollowRequest(req,res)
+});
+router.post("/deleteFollowRequest",  (req, res) => {
+    follow.deleteFollowRequest(req,res)
+});
+router.get("/getFollowerList",  (req, res) => {
+    follow.getFollowerList(req,res)
+});
+router.get("/getFollowingList",  (req, res) => {
+    follow.getFollowingList(req,res)
+});
+router.get("/getpendingRequestList",  (req, res) => {
+    follow.getpendingRequestList(req,res)
 });
 module.exports = router;

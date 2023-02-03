@@ -208,8 +208,9 @@ module.exports =
             return new Promise(async (resolve, reject) => {
               
                 jwt.verify(param.token, `'${config.JwtSupersecret}'`, async (err, decoded) => {
-                    // console.log(err)
-                    // console.log(decoded)
+                    if(err){
+                        reject(responseCode.UnauthorizedUser(err));
+                    }
                     if (decoded && decoded.id) {
                         resolve(decoded);
                     }
@@ -222,12 +223,15 @@ module.exports =
         
     customQuery: async (sql) => {
         try {
+            
             return new Promise(async (resolve, reject) => {
                 let responseObj = {};
                 
                 try {
+                   
                     dbConnection.query(sql, async (err, result) => {
                         if (err) {
+                            
                             reject(responseCode.dbErrorResponse(err));
                         }
                         if (result && result.length > 0) {

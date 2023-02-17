@@ -8,6 +8,7 @@ const User      = require('./controllers/users/userControllers');
 const meme      = require('./controllers/meme_categories/meme_categories');
 const follow    = require('./controllers/follow/UserFollowingController');
 const post      = require('./controllers/post/feed')
+const webAPI    = require('./controllers/wep-API/webApiControllers')
 const multer    = require('multer');
 const upload    = multer({dest : 'uploads/'});
 
@@ -76,5 +77,28 @@ router.get("/getFollowingList",  (req, res) => {
 });
 router.get("/getpendingRequestList",  (req, res) => {
     follow.getpendingRequestList(req,res)
+});
+router.route('/agencySignup').post(webAPI.agencySignUp);
+router.route('/agencyLogin').post(webAPI.agencyLogin);
+router.post("/agencyValidateOTP",  (req, res) => {
+    webAPI.validateOTP(req,res)
+});
+router.get("/getBlog",  (req, res) => {
+    webAPI.getBlog(req,res)
+});
+router.get("/getCaseStudy",  (req, res) => {
+    webAPI.getCaseStudy(req,res)
+});
+router.post("/contact_us",  (req, res) => {
+    webAPI.contact_us(req,res)
+});
+router.post("/createCampaign", upload.single('logo'), (req, res) => {
+    webAPI.createCampaign(req,res)
+});
+router.get("/listCampaign",  (req, res) => {
+    webAPI.listCampaign(req,res)
+});
+router.get("/getCampaignById",  (req, res) => {
+    webAPI.getCampaignById(req,res)
 });
 module.exports = router;

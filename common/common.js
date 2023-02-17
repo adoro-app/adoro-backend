@@ -4,7 +4,6 @@ const config = require('../config/config');
 const responseCode = require('../constant/response');
 const jwt = require('jsonwebtoken');
 const _ = require('underscore');
-const { param } = require('../route');
 const _SERVER = 'Production';
 
 
@@ -73,7 +72,7 @@ module.exports =
                                 reject(responseCode.dbErrorResponse(err));
                             }
                             if (result && result.length > 0) {
-                                console.log(result)
+                                // console.log(result)
                                 responseObj = responseCode.fetchRecordSuccessResponse(result);
                                 resolve(responseObj);
                             } else {
@@ -104,7 +103,7 @@ module.exports =
                                 reject(responseCode.dbErrorResponse(err));
                             }
                             else (!_.isEmpty(result))
-                            {
+                            {console.log(result)
                                 responseObj = await responseCode.recordAddedSuccessResponse(result);
                             }
                             // console.log(responseObj)

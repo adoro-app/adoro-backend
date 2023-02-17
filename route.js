@@ -101,4 +101,7 @@ router.get("/listCampaign",  (req, res) => {
 router.get("/getCampaignById",  (req, res) => {
     webAPI.getCampaignById(req,res)
 });
+router.get("/dashboard",  (req, res) => {
+    webAPI.dashboard(req,res)
+});
 module.exports = router;

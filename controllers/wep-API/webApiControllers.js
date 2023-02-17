@@ -252,21 +252,22 @@ exports.contact_us = async (req,res) =>
 exports.dashboard = async (req,res) =>
 {
   try{
-    let res = {};
+    let resObj = {};
     let getcampaigncount = 'SELECT COUNT(*) AS campaign_count FROM campaign'
     let GetRecords = await common.customQuery(getcampaigncount)
-    res['campaign_count'] = GetRecords.campaign_count
+    resObj['campaign_count'] = GetRecords.data[0].campaign_count
     console.log(GetRecords)
-    let getpendingcampaign = 'SELECT COUNT(*) AS pendingCampaign FROM campaign WHERE status = pending'
+    let getpendingcampaign = `SELECT COUNT(*) AS pendingCampaign FROM campaign WHERE status = 'pending'`
     let getPendingcam = await common.customQuery(getpendingcampaign)
     console.log(getPendingcam)
-    res['pending_campaign'] = getPendingcam.pendingCampaign
+    resObj['pending_campaign'] = getPendingcam.data[0].pendingCampaign
+    console.log(resObj)
     // if(GetRecords.data.length > 0){
       let response = {
         status : 200,
         msg : 'Records Found',
         // data:GetRecords.data[0]
-        data : res
+        data : resObj
 
       }
       res.send(response)

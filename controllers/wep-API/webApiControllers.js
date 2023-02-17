@@ -39,7 +39,7 @@ exports.agencySignUp = async (req,res) =>
           }
           res.send(response)
         }else{
-         
+         let datenow = new Date();
           let insertObj = {
                 first_name : first_name,
                 last_name : last_name,
@@ -56,7 +56,8 @@ exports.agencySignUp = async (req,res) =>
                 target_audience : target_audience,
                 IsLogo : IsLogo,
                 IsStock_image : IsStock_image,
-                brand_guidlines : brand_guidlines
+                brand_guidlines : brand_guidlines,
+                created_on : moment(datenow).format('YYYY-MM-DD HH:mm:ss')
 
           }
           let addRecords = await common.AddRecords('agency', insertObj )
@@ -382,6 +383,31 @@ exports.getCampaignById = async (req,res) =>
         let response = {
           status : 500,
           msg : 'Not Found'
+        }
+        res.send(response)
+      }
+        
+    } catch (error) {
+     res.send(error);
+  }
+};
+exports.userExist = async (req,res) =>
+{
+  try{
+    let email = req.body.email;
+    let GetRecords = await common.GetRecords('agency', '*', `email = '${email}'`  )
+      if(GetRecords.data.length > 0){
+        let response = {
+          status : 500,
+          msg : 'user already exist, Please login to countinue',
+          // data:GetRecords.data
+
+        }
+        res.send(response)
+      }else{
+        let response = {
+          status : 200,
+          msg : 'User Not Found'
         }
         res.send(response)
       }

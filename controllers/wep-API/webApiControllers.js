@@ -31,7 +31,7 @@ exports.agencySignUp = async (req,res) =>
       let brand_guidlines = (req.body.brand_guidlines) ? req.body.brand_guidlines : ""
       
       if (mobileNo != ""  ){ 
-        let GetRecords = await common.GetRecords('agency', 'id', `mobileNo =${mobileNo} && email = ${email}` )
+        let GetRecords = await common.GetRecords('agency', 'id', `mobileNo = '${mobileNo}' && email = '${email}'` )
         if(GetRecords.data.length > 0) {
           let response = {
             status : 500,

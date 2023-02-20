@@ -175,7 +175,7 @@ exports.getBlog = async (req,res) =>
       let response = {
         status : 200,
         msg : 'Records Found',
-        data:GetRecords.data[0]
+        data:GetRecords.data
 
       }
       res.send(response)
@@ -201,7 +201,7 @@ exports.getCaseStudy = async (req,res) =>
         let response = {
           status : 200,
           msg : 'Records Found',
-          data:GetRecords.data[0]
+          data:GetRecords.data
 
         }
         res.send(response)

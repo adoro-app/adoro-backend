@@ -8,6 +8,8 @@ const routes          = require('./route.js');
 const config          = require('./config/config.js');
 var multer            = require('multer');
 // var upload            = multer();
+var cors = require('cors')
+app.use(cors())
 const fileUpload = require('express-fileupload');
 
 

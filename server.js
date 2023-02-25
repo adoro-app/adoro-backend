@@ -8,10 +8,21 @@ const routes          = require('./route.js');
 const config          = require('./config/config.js');
 var multer            = require('multer');
 // var upload            = multer();
+
 var cors = require('cors')
 app.use(cors())
 const fileUpload = require('express-fileupload');
 
+app.use((req, res, next) => {
+  // if (process.env.NODE_ENV === 'production') {
+      if (req.headers['x-forwarded-proto'] !== 'https')
+          // the statement for performing our redirection
+          return res.redirect('https://' + req.headers.host + req.url);
+      else
+          return next();
+  // } else
+  //     return next();
+});
 
 // let moment            = require('moment');
 // let tsFormat          = moment().format(config.DateFormate).trim();
@@ -43,6 +54,7 @@ app.use((req, res, next) =>
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: true }));
+    
     // app.use(upload.array('image'));
     // app.use(upload.single('tile_image')) 
     // app.use(express.static('public'));

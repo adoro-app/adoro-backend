@@ -30,12 +30,12 @@ exports.agencySignUp = async (req,res) =>
       let IsStock_image = (req.body.IsStock_image) ? req.body.IsStock_image : ""
       let brand_guidlines = (req.body.brand_guidlines) ? req.body.brand_guidlines : ""
       
-      if (mobileNo != ""  ){ 
-        let GetRecords = await common.GetRecords('agency', 'id', `mobileNo = '${mobileNo}' && email = '${email}'` )
+      if (email != ""  ){ 
+        let GetRecords = await common.GetRecords('agency', 'id', `email = '${email}'` )
         if(GetRecords.data.length > 0) {
           let response = {
             status : 500,
-            msg : 'MobileNo Already Registered, Please login to countinue.'
+            msg : 'Email Already Registered, Please login to countinue.'
           }
           res.send(response)
         }else{
@@ -61,7 +61,7 @@ exports.agencySignUp = async (req,res) =>
 
           }
           let addRecords = await common.AddRecords('agency', insertObj )
-          console.log(addRecords.data.insertId)
+          // console.log(addRecords.data.insertId)
           // let message = `Hey Creator, Your OTP for signup is ${generateOtp}. Share our app with everyone, not this OTP. Visit adoro.social THINK ELLPSE`
           // let url = `https://sms.prowtext.com/sendsms/sendsms.php?apikey=${config.api_key}&type=TEXT&mobile=${mobileNo}&sender=ELLPSE&PEID=${config.PEID}&TemplateId=${config.templateID}&message=${message}`
           // let sendMsg = await axios.get(url)
@@ -425,9 +425,15 @@ exports.userExist = async (req,res) =>
 exports.getCampaignByStatus = async (req,res) =>
 {
   try{
-    let status = req.query.status;
-    let userId = req.query.userId
-    let GetRecords = await common.GetRecords('campaign', '*', `status = '${status}' AND userId = '${userId}'`  )
+    let status = (req.query.status) ? req.query.status : '';
+    let userId = req.query.userId;
+    let GetRecords;
+    if(status != '' ){
+          GetRecords = await common.GetRecords('campaign', '*', `status = '${status}' AND userId = '${userId}'`  )
+    }else{
+          GetRecords = await common.GetRecords('campaign', '*', `userId = '${userId}'`  )
+    }
+    
       if(GetRecords.data.length > 0){
         let response = {
           status : 200,

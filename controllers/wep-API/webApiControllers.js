@@ -61,13 +61,15 @@ exports.agencySignUp = async (req,res) =>
 
           }
           let addRecords = await common.AddRecords('agency', insertObj )
+          console.log(addRecords.data.insertId)
           // let message = `Hey Creator, Your OTP for signup is ${generateOtp}. Share our app with everyone, not this OTP. Visit adoro.social THINK ELLPSE`
           // let url = `https://sms.prowtext.com/sendsms/sendsms.php?apikey=${config.api_key}&type=TEXT&mobile=${mobileNo}&sender=ELLPSE&PEID=${config.PEID}&TemplateId=${config.templateID}&message=${message}`
           // let sendMsg = await axios.get(url)
           if(addRecords.data.affectedRows == 1){
             let response = {
               status : 200,
-              msg : 'Sign up successfull, Please login to countinue.'
+              msg : 'Sign up successfull, Please login to countinue.',
+              userId : addRecords.data.insertId
             }
             res.send(response)
           }
@@ -101,13 +103,13 @@ exports.agencyLogin = async (req,res) =>
           // let sendMsg = await axios.get(url)
           // let updateObj = {"otp" : generateOtp}
           // let addOTP = await common.UpdateRecords(config.userTable, updateObj, GetRecords.data[0].id  )
-          let token =  jwt.sign({ id: GetRecords.data[0].id }, `'${config.JwtSupersecret}'`, {
-            expiresIn: 864000 //parseInt(config.JwtTokenExpiresIn)
-        });
+        //   let token =  jwt.sign({ id: GetRecords.data[0].id }, `'${config.JwtSupersecret}'`, {
+        //     expiresIn: 864000 //parseInt(config.JwtTokenExpiresIn)
+        // });
           let response = {
             status : 200,
             msg : 'Login Successfully',
-            token : token
+            userId : GetRecords.data[0].id
           }
           res.send(response)
         }else{
@@ -286,26 +288,29 @@ exports.dashboard = async (req,res) =>
 };
 exports.createCampaign = async (req,res) =>
 {
+  // console.log(req)
   try{
     let reqBody = req.body;
+    // console.log(reqBody)
     let datenow = new Date();
-    // console.log(req.file.path)
+    // console.log(req.file)
     const filestream = fs.createReadStream(req.file.path)
     const params = {
         Bucket: config.aws_bucket_name_brand,
         Key: `${req.file.filename}.jpg`,
         Body: filestream
     }
-    
+    // console.log(params)
     s3.upload(params, async (err, data) => {
     if (err) {
-      // console.log(err)
+      console.log(err)
         reject(err)
     }
     // console.log(data.Location);
     let addObj = {
       brand_name : reqBody.brand_name,
       campaign_name: reqBody.campaign_name,
+      userId : reqBody.userId,
       logo: data.Location,
       time_limit: reqBody.time_limit,
       description : reqBody.description,
@@ -315,6 +320,7 @@ exports.createCampaign = async (req,res) =>
     }
    
     let addRecord = await common.AddRecords('campaign', addObj ) 
+    // console.log(addRecord)
     if(addRecord.data.affectedRows == 1){
       fs.unlink(path.join(__dirname, `../../uploads/${req.file.filename}`), function (err) {
         if (err) throw err;
@@ -342,8 +348,8 @@ exports.createCampaign = async (req,res) =>
 exports.listCampaign = async (req,res) =>
 {
   try{
-        
-    let GetRecords = await common.GetRecords('campaign', '*', '' )
+    let userId = req.query.userId
+    let GetRecords = await common.GetRecords('campaign', '*', `userId = ${userId}` )
       if(GetRecords.data.length > 0){
         let response = {
           status : 200,
@@ -408,6 +414,32 @@ exports.userExist = async (req,res) =>
         let response = {
           status : 200,
           msg : 'User Not Found'
+        }
+        res.send(response)
+      }
+        
+    } catch (error) {
+     res.send(error);
+  }
+};
+exports.getCampaignByStatus = async (req,res) =>
+{
+  try{
+    let status = req.query.status;
+    let userId = req.query.userId
+    let GetRecords = await common.GetRecords('campaign', '*', `status = '${status}' AND userId = '${userId}'`  )
+      if(GetRecords.data.length > 0){
+        let response = {
+          status : 200,
+          msg : 'Campaign Found',
+          data:GetRecords.data
+
+        }
+        res.send(response)
+      }else{
+        let response = {
+          status : 500,
+          msg : 'Campaign Not Found'
         }
         res.send(response)
       }

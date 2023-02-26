@@ -107,4 +107,8 @@ router.get("/dashboard",  (req, res) => {
 router.post("/userExist",  (req, res) => {
     webAPI.userExist(req,res)
 });
+router.get("/getCampaignByStatus",  (req, res) => {
+    webAPI.getCampaignByStatus(req,res)
+});
+
 module.exports = router;

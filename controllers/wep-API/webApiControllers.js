@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const moment = require('moment');
 const AWS = require('aws-sdk'); 
 const fs = require('fs');
+const nodemailer = require("nodemailer");
 
 const s3 = new AWS.S3({
   accessKeyId: config.AWS_CREDENTIAL.accessKeyId,
@@ -449,6 +450,116 @@ exports.getCampaignByStatus = async (req,res) =>
         }
         res.send(response)
       }
+        
+    } catch (error) {
+     res.send(error);
+  }
+};
+
+exports.changePassword = async (req,res) =>
+{
+  // console.log(req)
+  try{
+    let reqBody = req.body;
+    // console.log(reqBody)
+    let datenow = new Date();
+    let GetRecords = await common.GetRecords('agency', '*', `id = '${reqBody.userId}'` );
+    let old_passord = GetRecords.data[0].password;
+    if(old_passord == reqBody.old_pass){
+      let updateObj = {
+        password: reqBody.new_pass,
+        }
+      let updateRecord = await common.UpdateRecords('agency', updateObj, reqBody.userId ) 
+      // console.log(updateRecord)
+      if (updateRecord.data.affectedRows == 1){
+        let response = {
+          status : 200,
+          msg : 'password updated successfully',
+        }
+        res.send(response)
+      }else{
+        let response = {
+          status : 500,
+          msg : 'Something went wrong',
+        }
+        res.send(response)
+      }
+      
+    }else{
+      let response = {
+        status : 500,
+        msg : 'Please provide correct password',
+      }
+      res.send(response)
+    }
+    } catch (error) {
+     res.send(error);
+  }
+};
+
+exports.forgetPassword = async (req,res) =>
+{
+  try{
+    let email = (req.query.email) ? req.query.email : '';
+    // let userId = req.query.userId;
+    // let GetRecords;
+    if(email != '' ){
+          let GetRecords = await common.GetRecords('agency', '*', `email = '${email}'`  )
+          console.log(GetRecords)
+          if(GetRecords.data.length > 0){
+           
+            var transporter = nodemailer.createTransport({
+              service: 'gmail',
+              auth: {
+                user: 'campaign@marqueberry.com',
+                pass: 'riduhxthwprnyilz'
+              }
+            });
+            
+            var mailOptions = {
+              from: 'campaign@marqueberry.com',
+              to: GetRecords.data[0].email,
+              subject: 'Forget Password request',
+              text: `Hi, Your passsword is ${GetRecords.data[0].password}`
+            };
+            
+            transporter.sendMail(mailOptions, function(error, info){
+              if (error) {
+                console.log(error);
+              } else {
+                // console.log('Email sent: ' + info.response);
+              let response = {
+                status : 200,
+                msg : 'Password sent to your registered email id',
+                // data:GetRecords.data
+    
+              }
+            res.send(response)
+              }
+            });
+           
+
+          }else{
+            let response = {
+              status : 500,
+              msg : 'Please provide valid email',
+              // data:GetRecords.data
+      
+            }
+            res.send(response)
+          }
+    }else{
+      let response = {
+        status : 500,
+        msg : 'Please provide valid email',
+        // data:GetRecords.data
+
+      }
+      res.send(response)
+          // GetRecords = await common.GetRecords('campaign', '*', `userId = '${userId}'`  )
+    }
+    
+     
         
     } catch (error) {
      res.send(error);

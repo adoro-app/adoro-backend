@@ -110,5 +110,10 @@ router.post("/userExist",  (req, res) => {
 router.get("/getCampaignByStatus",  (req, res) => {
     webAPI.getCampaignByStatus(req,res)
 });
-
+router.post("/changePassword",  (req, res) => {
+    webAPI.changePassword(req,res)
+});
+router.get("/forgetPassword",  (req, res) => {
+    webAPI.forgetPassword(req,res)
+});
 module.exports = router;

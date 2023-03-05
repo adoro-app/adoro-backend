@@ -298,7 +298,7 @@ exports.createCampaign = async (req,res) =>
     // console.log(reqBody)
     let datenow = new Date();
     // console.log(req.file)
-    if(req.file){
+    // if(req.file){
       // console.log('here')
       const filestream = fs.createReadStream(req.file.path)
       const params = {
@@ -346,14 +346,15 @@ exports.createCampaign = async (req,res) =>
           res.send(response)
         }
       })
-    }else{
-      // console.log('=============')
-      let response = {
-        status : 500,
-        msg : 'Please upload image to countinue.'
-      }
-      res.send(response)
-    }
+    // }
+    // else{
+    //   // console.log('=============')
+    //   let response = {
+    //     status : 500,
+    //     msg : 'Please upload image to countinue.'
+    //   }
+    //   res.send(response)
+    // }
     
     } catch (error) {
      res.send(error);

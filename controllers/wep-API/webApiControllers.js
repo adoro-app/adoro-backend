@@ -61,7 +61,8 @@ exports.agencySignUp = async (req,res) =>
                 created_on : moment(datenow).format('YYYY-MM-DD HH:mm:ss')
 
           }
-          let addRecords = await common.AddRecords('agency', insertObj )
+          let addRecords = await common.AddRecords('agency', insertObj );
+          let GetNewAgency = await common.GetRecords('agency', 'first_name, last_name', `id = '${addRecords.data.insertId}'` )
           // console.log(addRecords.data.insertId)
           // let message = `Hey Creator, Your OTP for signup is ${generateOtp}. Share our app with everyone, not this OTP. Visit adoro.social THINK ELLPSE`
           // let url = `https://sms.prowtext.com/sendsms/sendsms.php?apikey=${config.api_key}&type=TEXT&mobile=${mobileNo}&sender=ELLPSE&PEID=${config.PEID}&TemplateId=${config.templateID}&message=${message}`
@@ -70,7 +71,8 @@ exports.agencySignUp = async (req,res) =>
             let response = {
               status : 200,
               msg : 'Sign up successfull, Please login to countinue.',
-              userId : addRecords.data.insertId
+              userId : addRecords.data.insertId,
+              name : `${GetNewAgency.data[0].first_name} ${GetNewAgency.data[0].last_name}`
             }
             res.send(response)
           }
@@ -95,7 +97,7 @@ exports.agencyLogin = async (req,res) =>
       let email = (req.body.email) ? req.body.email : "";
       let password = (req.body.password) ? req.body.password : "";
       if (email != "" && password != ""){ 
-        let GetRecords = await common.GetRecords('agency', 'id', `email = '${email}' && password = '${password}'` )
+        let GetRecords = await common.GetRecords('agency', 'id, first_name, last_name', `email = '${email}' && password = '${password}'` )
         
         if(GetRecords.data.length > 0){
           
@@ -110,7 +112,8 @@ exports.agencyLogin = async (req,res) =>
           let response = {
             status : 200,
             msg : 'Login Successfully',
-            userId : GetRecords.data[0].id
+            userId : GetRecords.data[0].id,
+            name : `${GetRecords.data[0].first_name} ${GetRecords.data[0].last_name}`
           }
           res.send(response)
         }else{
@@ -295,52 +298,63 @@ exports.createCampaign = async (req,res) =>
     // console.log(reqBody)
     let datenow = new Date();
     // console.log(req.file)
-    const filestream = fs.createReadStream(req.file.path)
-    const params = {
-        Bucket: config.aws_bucket_name_brand,
-        Key: `${req.file.filename}.jpg`,
-        Body: filestream
-    }
-    // console.log(params)
-    s3.upload(params, async (err, data) => {
-    if (err) {
-      console.log(err)
-        reject(err)
-    }
-    // console.log(data.Location);
-    let addObj = {
-      brand_name : reqBody.brand_name,
-      campaign_name: reqBody.campaign_name,
-      userId : reqBody.userId,
-      logo: data.Location,
-      time_limit: reqBody.time_limit,
-      description : reqBody.description,
-      no_of_meme_needed : reqBody.no_of_meme_needed,
-      status : 'pending',
-      created_on : moment(datenow).format('YYYY-MM-DD HH:mm:ss')
-    }
-   
-    let addRecord = await common.AddRecords('campaign', addObj ) 
-    // console.log(addRecord)
-    if(addRecord.data.affectedRows == 1){
-      fs.unlink(path.join(__dirname, `../../uploads/${req.file.filename}`), function (err) {
-        if (err) throw err;
-        // if no error, file has been deleted successfully
-        console.log('File deleted!');
-    });
-        let response = {
-          status : 200,
-          msg : 'Successfull',
-        }
-        res.send(response)
-      }else{
-        let response = {
-          status : 500,
-          msg : 'Something went wrong'
-        }
-        res.send(response)
+    if(req.file){
+      // console.log('here')
+      const filestream = fs.createReadStream(req.file.path)
+      const params = {
+          Bucket: config.aws_bucket_name_brand,
+          Key: `${req.file.filename}.jpg`,
+          Body: filestream
       }
-    })
+      // console.log(params)
+      s3.upload(params, async (err, data) => {
+      if (err) {
+        console.log(err)
+          reject(err)
+      }
+      // console.log(data.Location);
+      let addObj = {
+        brand_name : reqBody.brand_name,
+        campaign_name: reqBody.campaign_name,
+        userId : reqBody.userId,
+        logo: data.Location,
+        time_limit: reqBody.time_limit,
+        description : reqBody.description,
+        no_of_meme_needed : reqBody.no_of_meme_needed,
+        status : 'pending',
+        created_on : moment(datenow).format('YYYY-MM-DD HH:mm:ss')
+      }
+     
+      let addRecord = await common.AddRecords('campaign', addObj ) 
+      // console.log(addRecord.data.affectedRows)
+      if(addRecord.data.affectedRows == 1){
+        fs.unlink(path.join(__dirname, `../../uploads/${req.file.filename}`), function (err) {
+          if (err) throw err;
+          // if no error, file has been deleted successfully
+          console.log('File deleted!');
+      });
+          let response = {
+            status : 200,
+            msg : 'Successfull',
+          }
+          res.send(response)
+        }else{
+          let response = {
+            status : 500,
+            msg : 'Something went wrong'
+          }
+          res.send(response)
+        }
+      })
+    }else{
+      // console.log('=============')
+      let response = {
+        status : 500,
+        msg : 'Please upload image to countinue.'
+      }
+      res.send(response)
+    }
+    
     } catch (error) {
      res.send(error);
   }

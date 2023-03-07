@@ -300,9 +300,9 @@ exports.createCampaign = async (req,res) =>
   // console.log(req)
   try{
     let reqBody = req.body;
-    console.log(reqBody)
+    // console.log(reqBody)
     let datenow = new Date();
-    console.log(req.file)
+    // console.log(req.file)
     // if(req.file){
       // console.log('here')
       const filestream = fs.createReadStream(req.file.path)

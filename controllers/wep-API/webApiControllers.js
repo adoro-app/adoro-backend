@@ -175,13 +175,18 @@ exports.validateOTP = async (req,res) =>
 exports.getBlog = async (req,res) =>
 {
   try{
-        
+    // let res;
     let GetRecords = await common.GetRecords('blog_case_study', '*', `status = 'active' AND category = 'blog'` )
     if(GetRecords.data.length > 0){
+      let GetMostRecent = await common.customQuery(`SELECT * FROM blog_case_study where status = 'active' AND category = 'blog'   ORDER BY id DESC LIMIT 5 `)
+      // console.log(GetMostRecent)
       let response = {
         status : 200,
         msg : 'Records Found',
-        data:GetRecords.data
+        data:GetRecords.data,
+        mostRecent : GetMostRecent.data
+
+
 
       }
       res.send(response)

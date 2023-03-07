@@ -93,6 +93,7 @@ router.post("/contact_us",  (req, res) => {
     webAPI.contact_us(req,res)
 });
 router.post("/createCampaign", upload.single('logo'), (req, res) => {
+    console.log(req)
     webAPI.createCampaign(req,res)
 });
 router.get("/listCampaign",  (req, res) => {

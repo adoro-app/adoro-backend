@@ -46,6 +46,7 @@ router.post("/like",  (req, res) => {
 });
 
 router.post("/createPost", upload.single('content_url'), (req, res) => {
+
     post.createPost(req,res)
 });
 router.post("/deleteLike",  (req, res) => {
@@ -93,7 +94,7 @@ router.post("/contact_us",  (req, res) => {
     webAPI.contact_us(req,res)
 });
 router.post("/createCampaign", upload.single('logo'), (req, res) => {
-    console.log(req)
+    console.log(req.file)
     webAPI.createCampaign(req,res)
 });
 router.get("/listCampaign",  (req, res) => {

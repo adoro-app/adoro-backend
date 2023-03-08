@@ -14,6 +14,7 @@ const s3 = new AWS.S3({
 exports.agencySignUp = async (req,res) =>
 {
   try{
+    console.log(req)
       let first_name = (req.body.first_name) ? req.body.first_name : "";
       let last_name = (req.body.last_name) ? req.body.last_name : "";
       let company_name = (req.body.company_name) ? req.body.company_name : "";

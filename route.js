@@ -79,7 +79,9 @@ router.get("/getFollowingList",  (req, res) => {
 router.get("/getpendingRequestList",  (req, res) => {
     follow.getpendingRequestList(req,res)
 });
-router.route('/agencySignup').post(webAPI.agencySignUp);
+router.post('/agencySignup',upload.single('logo'),(req,res)=>{
+    webAPI.agencySignUp(req,res)
+});
 router.route('/agencyLogin').post(webAPI.agencyLogin);
 router.post("/agencyValidateOTP",  (req, res) => {
     webAPI.validateOTP(req,res)

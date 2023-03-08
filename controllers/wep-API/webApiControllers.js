@@ -30,6 +30,13 @@ exports.agencySignUp = async (req,res) =>
       let IsLogo = (req.body.IsLogo) ? req.body.IsLogo : ""
       let IsStock_image = (req.body.IsStock_image) ? req.body.IsStock_image : ""
       let brand_guidlines = (req.body.brand_guidlines) ? req.body.brand_guidlines : ""
+      let brand_name = (req.body.brand_name) ? req.body.brand_name : ""
+      let static_meme = (req.body.static_meme) ? req.body.static_meme : "0"
+      let video_meme = (req.body.video_meme) ? req.body.video_meme : "0"
+      let gif = (req.body.gif) ? req.body.gif : "0"
+      let description = (req.body.description) ? req.body.description : ""
+      let time_limit = (req.body.time_limit) ? req.body.time_limit : ""
+
       
       if (email != ""  ){ 
         let GetRecords = await common.GetRecords('agency', 'id', `email = '${email}'` )
@@ -52,7 +59,6 @@ exports.agencySignUp = async (req,res) =>
                 marketing_budget : marketing_budget,
                 meme_format : meme_format,
                 marketing_goals : marketing_goals,
-                campaign_name : campaign_name,
                 campaign_industry : campaign_industry,
                 target_audience : target_audience,
                 IsLogo : IsLogo,
@@ -62,21 +68,59 @@ exports.agencySignUp = async (req,res) =>
 
           }
           let addRecords = await common.AddRecords('agency', insertObj );
-          let GetNewAgency = await common.GetRecords('agency', 'first_name, last_name', `id = '${addRecords.data.insertId}'` )
-          // console.log(addRecords.data.insertId)
-          // let message = `Hey Creator, Your OTP for signup is ${generateOtp}. Share our app with everyone, not this OTP. Visit adoro.social THINK ELLPSE`
-          // let url = `https://sms.prowtext.com/sendsms/sendsms.php?apikey=${config.api_key}&type=TEXT&mobile=${mobileNo}&sender=ELLPSE&PEID=${config.PEID}&TemplateId=${config.templateID}&message=${message}`
-          // let sendMsg = await axios.get(url)
           if(addRecords.data.affectedRows == 1){
+            const filestream = fs.createReadStream(req.file.path)
+            const params = {
+                Bucket: config.aws_bucket_name_brand,
+                Key: `${req.file.filename}.jpg`,
+                Body: filestream
+            }
+            // console.log(params)
+            s3.upload(params, async (err, data) => {
+            if (err) {
+              console.log(err)
+                reject(err)
+             }
+             fs.unlink(path.join(__dirname, `../../uploads/${req.file.filename}`), function (err) {
+              if (err) throw err;
+              // if no error, file has been deleted successfully
+              console.log('File deleted!');
+          1  });
+             let addcampaign = {
+              userId : addRecords.data.insertId,
+              campaign_name : campaign_name,
+              brand_name : brand_name,
+              static_meme : static_meme,
+              video_meme : video_meme,
+              gif : gif,
+              description:description,
+              logo : data.Location,
+              time_limit : time_limit,
+              status : 'pending',
+              created_on : moment(datenow).format('YYYY-MM-DD HH:mm:ss')
+            }
+            let addCamp = await common.AddRecords('campaign', addcampaign );
+            if(addCamp.data.affectedRows == 1){
+              let GetNewAgency = await common.GetRecords('agency', 'first_name, last_name', `id = '${addRecords.data.insertId}'` )
+              let response = {
+                status : 200,
+                msg : 'Sign up successfull, Please login to countinue.',
+                userId : addRecords.data.insertId,
+                name : `${GetNewAgency.data[0].first_name} ${GetNewAgency.data[0].last_name}`
+              }
+              res.send(response)
+            }
+            })
+            
+          }else{
             let response = {
-              status : 200,
-              msg : 'Sign up successfull, Please login to countinue.',
+              status : 500,
+              msg : 'Something went wrong.',
               userId : addRecords.data.insertId,
               name : `${GetNewAgency.data[0].first_name} ${GetNewAgency.data[0].last_name}`
             }
             res.send(response)
           }
-          
         }
         
       }else{
@@ -176,15 +220,27 @@ exports.getBlog = async (req,res) =>
 {
   try{
     // let res;
-    let GetRecords = await common.GetRecords('blog_case_study', '*', `status = 'active' AND category = 'blog'` )
+    let GetRecords = await common.GetRecords('blog_case_study', '*', `status = 'active' AND category = 'blog' AND sub_category = 'nonFeatured'` )
     if(GetRecords.data.length > 0){
       let GetMostRecent = await common.customQuery(`SELECT * FROM blog_case_study where status = 'active' AND category = 'blog'   ORDER BY id DESC LIMIT 5 `)
+      
+      // for(let i = 0; i < GetRecords.data.length > 0 ; i ++){
+        for(let j = 0; j < GetMostRecent.data.length > 0; j++){
+          const index = GetRecords.data.findIndex(x => x.id == GetMostRecent.data[j].id);
+          if (index !== undefined) GetRecords.data.splice(index, 1);
+        }
+        let GetFeatured = await common.customQuery(`SELECT * FROM blog_case_study where status = 'active' AND category = 'blog' AND sub_category = 'featured'`)
+        // console.log(GetRecords.data)
+      
+      
+      
       // console.log(GetMostRecent)
       let response = {
         status : 200,
         msg : 'Records Found',
         data:GetRecords.data,
-        mostRecent : GetMostRecent.data
+        mostRecent : GetMostRecent.data,
+        Featured : GetFeatured.data
 
 
 
@@ -300,7 +356,8 @@ exports.createCampaign = async (req,res) =>
   // console.log(req)
   try{
     let reqBody = req.body;
-    // console.log(reqBody)
+    console.log(reqBody)
+    // return false;
     let datenow = new Date();
     // console.log(req.file)
     // if(req.file){
@@ -317,6 +374,11 @@ exports.createCampaign = async (req,res) =>
         console.log(err)
           reject(err)
       }
+      fs.unlink(path.join(__dirname, `../../uploads/${req.file.filename}`), function (err) {
+        if (err) throw err;
+        // if no error, file has been deleted successfully
+        console.log('File deleted!');
+    });
       // console.log(data.Location);
       let addObj = {
         brand_name : reqBody.brand_name,
@@ -325,19 +387,18 @@ exports.createCampaign = async (req,res) =>
         logo: data.Location,
         time_limit: reqBody.time_limit,
         description : reqBody.description,
-        no_of_meme_needed : reqBody.no_of_meme_needed,
+        static_meme : reqBody.static_meme,
+        video_meme: reqBody.video_meme,
+        gif:reqBody.gif,
+        // no_of_meme_needed : reqBody.no_of_meme_needed,
         status : 'pending',
         created_on : moment(datenow).format('YYYY-MM-DD HH:mm:ss')
       }
-     
+     console.log(addObj)
       let addRecord = await common.AddRecords('campaign', addObj ) 
       // console.log(addRecord.data.affectedRows)
       if(addRecord.data.affectedRows == 1){
-        fs.unlink(path.join(__dirname, `../../uploads/${req.file.filename}`), function (err) {
-          if (err) throw err;
-          // if no error, file has been deleted successfully
-          console.log('File deleted!');
-      });
+        
           let response = {
             status : 200,
             msg : 'Successfull',

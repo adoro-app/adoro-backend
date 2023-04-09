@@ -14,15 +14,15 @@ path = require('path');
 exports.sendFollowRequest = async (req, res)=>{
     
         try{
-            let follower_user_id = req.body.user_id;
+            let user_id = req.body.user_id;
             let checkToken = await common.checkToken(req.headers);
             let datenow = new Date()
             let currentDate = moment(datenow).format('YYYY-MM-DD HH:mm:ss');
             console.log(checkToken)
             if(checkToken.id){
                 let addobj ={
-                    user_id:checkToken.id,
-                    follower_user_id: follower_user_id,
+                    user_id:user_id,
+                    follower_user_id: checkToken.id,
                     status : 'pending',
                     created_on:currentDate
 
@@ -54,7 +54,7 @@ exports.sendFollowRequest = async (req, res)=>{
     exports.acceptFollowRequest = async (req, res)=>{
     
         try{
-            let id = req.body.id;
+            let id = req.body.requestId;
             let checkToken = await common.checkToken(req.headers);
             let datenow = new Date()
             let currentDate = moment(datenow).format('YYYY-MM-DD HH:mm:ss');
@@ -196,7 +196,7 @@ exports.sendFollowRequest = async (req, res)=>{
             
             if(checkToken.id){
                 console.log(checkToken)
-                let sql = `SELECT users.id, users.username, users.full_name, users.image, follower.status FROM follower LEFT JOIN users ON 
+                let sql = `SELECT follower.id as requestId ,users.id, users.username, users.full_name, users.image, follower.status FROM follower LEFT JOIN users ON 
                 follower.follower_user_id = users.id WHERE follower.user_id = ${checkToken.id} AND follower.status = 'pending'`
                 let getUser = await common.customQuery(sql);
                 if (getUser.data.length > 0){

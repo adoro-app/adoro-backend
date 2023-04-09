@@ -65,6 +65,7 @@ exports.login = async (req,res) =>
           let sendMsg = await axios.get(url)
           let updateObj = {"otp" : generateOtp}
           let addOTP = await common.UpdateRecords(config.userTable, updateObj, GetRecords.data[0].id  )
+          console.log(addOTP)
           let response = {
             status : 200,
             msg : 'OTP Sent Successfully'

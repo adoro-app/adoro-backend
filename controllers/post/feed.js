@@ -18,21 +18,29 @@ exports.feed = async (req,res) =>
   try{
     let responseObj = {}
      let category = req.query.category;
+     let pageNumber = req.query.pageNumber;
      let checkToken = await common.checkToken(req.headers);
-     if (checkToken)
+     console.log(checkToken)
+     if (checkToken.id)
      {
         let sqlQryForFeed = '';
         if (category == 'trending'){
-             sqlQryForFeed = `SELECT l.post_id, p.id, p.content, p.content_type, p.content_url, p.created_on, count(*) as noOfLikes 
-             FROM likes l LEFT JOIN post p ON l.post_id = p.id
+             sqlQryForFeed = `SELECT p.id, p.id, p.content, p.content_type, p.content_url, p.created_on, count(*) as noOfLikes 
+             FROM likes l RIGHT JOIN post p ON l.post_id = p.id
              GROUP BY l.post_id 
-             ORDER BY noOfLikes DESC`
+             ORDER BY noOfLikes DESC limit 10 offset ${pageNumber * 10}`
+        }else if(category == 'relevant'){
+            sqlQryForFeed = `SELECT * FROM post left join users on users.id = post.user_id LEFT join follower on follower.user_id = post.user_id WHERE follower.follower_user_id = ${checkToken.id} ORDER BY post.created_on DESC limit 10 offset ${pageNumber * 10}`
         }else{
-            sqlQryForFeed = ''
+            let categoryIn = (category) ? category : '';
+            let sqlforgetcategoryId = `SELECT * FROM post_categories WHERE title = '${categoryIn}'`
+            let getcategoryId = await common.customQuery(sqlforgetcategoryId);
+            let categoryId = getcategoryId.data[0].id;
+            
+            sqlQryForFeed = `SELECT * FROM post WHERE category_id = '${categoryId}'`
         }
-       
+        
         let getData = await common.customQuery(sqlQryForFeed);
-    
         if (getData.data.length > 0){
                 responseObj = getData.data;
                 let result = [];
@@ -61,15 +69,21 @@ async function fetchData(res, uid){
         let sqlForFetchLikes = `SELECT users.id, users.username, users.full_name, users.image FROM post LEFT JOIN likes ON post.id = likes.post_id LEFT JOIN users on likes.user_id = users.id WHERE post.id = ${res.id}`;
         let FetchLikes = await common.customQuery(sqlForFetchLikes);
         FetchLikes = (FetchLikes.data) ? FetchLikes.data : ''
-        res['likedByPeople'] = FetchLikes;
-        res['likedByMe'] = false;
-        for (let j = 0; j < FetchLikes.length; j++){
-            
-            if (uid == FetchLikes[j].id){
-                res['likedByMe'] = true;
+       
+        if(FetchLikes[0].id != null){
+            res['likedByPeople'] = FetchLikes;
+            res['likedByMe'] = false;
+            for (let j = 0; j < FetchLikes.length; j++){
+                
+                if (uid == FetchLikes[j].id){
+                    res['likedByMe'] = true;
+                }
+    
             }
-
         }
+        let sqlForGetAllCommentsCount = `SELECT COUNT(*) as total_comments FROM comments  WHERE post_id = ${res.id}`;
+        let fetchCommentsCount = await common.customQuery(sqlForGetAllCommentsCount);
+        res['comments'] = fetchCommentsCount.data[0].total_comments;
         let sqlForFetchUserWhoLikesPost = `SELECT id, username, full_name, image  FROM users WHERE id = ${res.id}`;
         let FetchUser = await common.customQuery(sqlForFetchUserWhoLikesPost);
         res['author'] = FetchUser.data
@@ -283,6 +297,45 @@ exports.like = async (req, res)=>{
             throw err;
         }
          
+    }
+
+    exports.postUserCategory = async (req, res)=>{
+    
+        try{
+            let selected_category = req.body.selected_categories;
+            let checkToken = await common.checkToken(req.headers);
+            console.log(checkToken)
+            let datenow = new Date()
+            let currentDate = moment(datenow).format('YYYY-MM-DD HH:mm:ss');
+            console.log(selected_category.length)
+            if(checkToken.id && selected_category.length > 0){
+               
+                for(let i =0; i < selected_category.length; i++){
+                    let addobj = {
+                        "user_id" : checkToken.id,
+                        "category_id": selected_category[i]
+                    }
+                   await common.AddRecords('user_meme_categories', addobj )
+                }
+                let response = {
+                    status : 200,
+                    msg : 'Successfull'
+                }
+                        
+                res.send(response)
+                
+                
+              
+            }else{
+                res.send(response.UnauthorizedUser(checkToken))
+            }
+            // let addRecords = common.AddRecords()
+
+        }catch(err){
+            throw err;
+        }
+       
+        
     }
 
 

@@ -11,6 +11,7 @@ const post      = require('./controllers/post/feed')
 const webAPI    = require('./controllers/wep-API/webApiControllers')
 const multer    = require('multer');
 const upload    = multer({dest : 'uploads/'});
+const comment   = require('./controllers/comment/commentController')
 
 router.route('/signup').post(signup.userSignUp);
 router.route('/login').post(signup.login);
@@ -119,5 +120,21 @@ router.post("/changePassword",  (req, res) => {
 });
 router.get("/forgetPassword",  (req, res) => {
     webAPI.forgetPassword(req,res)
+});
+// router.post("/postUserCategory",  (req, res) => {
+//     post.postUserCategory(req,res)
+// });
+
+router.post("/postComment",  (req, res) => {
+    comment.postComment(req,res)
+});
+router.post("/deleteComment",  (req, res) => {
+    comment.deleteComment(req,res)
+});
+router.post("/updateComment",  (req, res) => {
+    comment.updateComment(req,res)
+});
+router.get("/getAllcomments",  (req, res) => {
+    comment.getAllcomments(req,res)
 });
 module.exports = router;

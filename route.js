@@ -12,6 +12,7 @@ const webAPI    = require('./controllers/wep-API/webApiControllers')
 const multer    = require('multer');
 const upload    = multer({dest : 'uploads/'});
 const comment   = require('./controllers/comment/commentController')
+const campaign  = require('./controllers/campaign&contest/campaignContestController')
 
 router.route('/signup').post(signup.userSignUp);
 router.route('/login').post(signup.login);
@@ -137,4 +138,24 @@ router.post("/updateComment",  (req, res) => {
 router.get("/getAllcomments",  (req, res) => {
     comment.getAllcomments(req,res)
 });
+
+router.get("/getAllcampaignAndContestApp",  (req, res) => {
+    campaign.getAllcampaignAndcontestApp(req,res)
+});
+// router.get("/applyCampaign",  (req, res) => {
+//     campaign.applyCampaign(req,res)
+// });
+router.post("/applyCampaign", upload.single('media'), (req, res) => {
+    // console.log(req.file)
+    campaign.applyCampaign(req,res)
+});
+router.post("/applyContest", upload.single('media'), (req, res) => {
+    // console.log(req.file)
+    campaign.applyContest(req,res)
+});
+
+router.get("/getPostById",  (req, res) => {
+    post.getPostById(req,res)
+});
+
 module.exports = router;

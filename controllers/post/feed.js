@@ -37,7 +37,7 @@ exports.feed = async (req,res) =>
             let getcategoryId = await common.customQuery(sqlforgetcategoryId);
             let categoryId = getcategoryId.data[0].id;
             
-            sqlQryForFeed = `SELECT * FROM post WHERE category_id = '${categoryId}'`
+            sqlQryForFeed = `SELECT * FROM post WHERE category_id = '${categoryId}' limit 10 offset ${pageNumber * 10}`
         }
         
         let getData = await common.customQuery(sqlQryForFeed);
@@ -49,7 +49,12 @@ exports.feed = async (req,res) =>
                     let prepareRes = await fetchData(data,checkToken.id);
                     result.push(prepareRes) ;
                 }
-                res.send(result)
+                let resp = {
+                    status : 200,
+                    msg:'Data Found',
+                    data : result
+                }
+                res.send(resp)
             }else{
             let res = {
                 status : 500,

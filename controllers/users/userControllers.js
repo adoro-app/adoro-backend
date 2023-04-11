@@ -6,6 +6,7 @@ const moment = require('moment');
 const AWS = require('aws-sdk'); 
 // const multer = require('multer');
 const path = require('path');
+const { get } = require('underscore');
 
 const s3 = new AWS.S3({
     accessKeyId: config.AWS_CREDENTIAL.accessKeyId,
@@ -21,8 +22,18 @@ exports.getUserDetails = async (req, res) => {
       let response = {
         status : 200,
         msg : 'user found.',
-        data : getuserdetails.data
-      }
+        data : getuserdetails.data,
+       }
+      let getPost = await common.GetRecords('post', '*', `user_id = ${userId}`)
+      response['post'] = getPost.data;
+      let sql = `SELECT users.id, users.username, users.full_name, users.image, follower.status FROM follower LEFT JOIN users ON 
+      follower.user_id = users.id WHERE follower.user_id = ${userId} AND follower.status = 'accepted'`
+      let getFollower = await common.customQuery(sql);
+      response['follower'] = getFollower.data;
+      let sqlForFollowing = `SELECT users.id, users.username, users.full_name, users.image, follower.status FROM follower LEFT JOIN users ON 
+      follower.user_id = users.id WHERE follower.follower_user_id = ${userId} AND follower.status = 'accepted'`
+      let getFollowingList = await common.customQuery(sqlForFollowing);
+      response['following'] = getFollowingList.data;
       await res.send(response);
     
     }else{

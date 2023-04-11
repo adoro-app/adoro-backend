@@ -20,6 +20,8 @@ module.exports =
 	"aws_bucket_name_user"	 : 'adoro/userimage',
 	"aws_bucket_name_post" : 'adoro/post',
 	"aws_bucket_name_brand" : 'adoro/brand',
+	"aws_bucket_name_campaign":'adoro/userAppliedcampaign',
+	"aws_bucket_name_contest" : 'adoro/userAppliedContests',
 	"AWS_CREDENTIAL"     :{
 		"accessKeyId":"AKIA4EZQCBCZLYFKLJGU",
 		"secretAccessKey":"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"

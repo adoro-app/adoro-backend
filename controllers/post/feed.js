@@ -43,6 +43,7 @@ exports.feed = async (req,res) =>
         let getData = await common.customQuery(sqlQryForFeed);
         console.log(getData);
         if (getData.data.length > 0){
+            console.log('if=====')
                 responseObj = getData.data;
                 let result = [];
                 for (let i = 0; i < responseObj.length; i++ ){
@@ -57,6 +58,7 @@ exports.feed = async (req,res) =>
                 }
                 res.send(resp)
             }else{
+                console.log('else====>')
             let res = {
                 status : 500,
                 msg:'Not Found'

@@ -39,8 +39,9 @@ exports.feed = async (req,res) =>
             
             sqlQryForFeed = `SELECT * FROM post WHERE category_id = '${categoryId}' limit 10 offset ${pageNumber * 10}`
         }
-        
+        console.log(sqlQryForFeed)
         let getData = await common.customQuery(sqlQryForFeed);
+        console.log(getData);
         if (getData.data.length > 0){
                 responseObj = getData.data;
                 let result = [];
@@ -58,7 +59,7 @@ exports.feed = async (req,res) =>
             }else{
             let res = {
                 status : 500,
-                msg:'please select correct category'
+                msg:'Not Found'
             }
             res.send(res)
         }

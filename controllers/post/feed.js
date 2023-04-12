@@ -43,7 +43,7 @@ exports.feed = async (req,res) =>
         let getData = await common.customQuery(sqlQryForFeed);
         console.log(getData);
         if (getData.data.length > 0){
-            console.log('if=====')
+          
                 responseObj = getData.data;
                 let result = [];
                 for (let i = 0; i < responseObj.length; i++ ){
@@ -58,13 +58,15 @@ exports.feed = async (req,res) =>
                 }
                 res.send(resp)
             }else{
-                console.log('else====>')
-            let res = {
+               
+            let resp = {
                 status : 500,
                 msg:'Not Found'
             }
-            res.send(res)
+            res.send(resp)
         }
+     }else{
+        res.send(response.UnauthorizedUser(checkToken))
      }
     } catch (error) {
 
@@ -77,8 +79,8 @@ async function fetchData(res, uid){
         let sqlForFetchLikes = `SELECT users.id, users.username, users.full_name, users.image FROM post LEFT JOIN likes ON post.id = likes.post_id LEFT JOIN users on likes.user_id = users.id WHERE post.id = ${res.id}`;
         let FetchLikes = await common.customQuery(sqlForFetchLikes);
         FetchLikes = (FetchLikes.data) ? FetchLikes.data : ''
-       
-        if(FetchLikes[0].id != null){
+       console.log(FetchLikes)
+        if(FetchLikes.length > 0 && FetchLikes[0].id != null){
             res['likedByPeople'] = FetchLikes;
             res['likedByMe'] = false;
             for (let j = 0; j < FetchLikes.length; j++){

@@ -130,7 +130,7 @@ exports.sendFollowRequest = async (req, res)=>{
             if(checkToken.id){
                 
                 let sql = `SELECT users.id, users.username, users.full_name, users.image, follower.status FROM follower LEFT JOIN users ON 
-                follower.user_id = users.id WHERE follower.user_id = ${checkToken.id} AND follower.status = 'accepted'`
+                follower.follower_user_id = users.id WHERE follower.user_id = ${checkToken.id} AND follower.status = 'accepted'`
                 let getUser = await common.customQuery(sql);
                 if (getUser.data.length > 0){
                     let response = {

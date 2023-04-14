@@ -11,9 +11,9 @@ module.exports =
 		"DATABASE":"adoro"
 	},
 	"MYSQL_CREDENTIAL_PRODUCTION":{
-		"HOST":"adoro.csm3cnk9mdlu.ap-south-1.rds.amazonaws.com",
+		"HOST":"adoro-dev.csm3cnk9mdlu.ap-south-1.rds.amazonaws.com",
 		"USER":"admin",
-		"PASSWORD":"root12345",
+		"PASSWORD":"admin@123",
 		"PORT" : 3306,
 		"DATABASE":"adoro"
 	},

@@ -30,7 +30,7 @@ exports.feed = async (req,res) =>
              GROUP BY l.post_id 
              ORDER BY noOfLikes DESC limit 10 offset ${pageNumber * 10}`
         }else if(category == 'relevant'){
-            sqlQryForFeed = `SELECT post.id, post.content, post.content_type, post.content_url, users.username, users.full_name, users.image as user_image FROM post left join users on users.id = post.user_id LEFT join follower on follower.user_id = post.user_id WHERE follower.follower_user_id = ${checkToken.id} ORDER BY post.created_on DESC limit 10 offset ${pageNumber * 10}`
+            sqlQryForFeed = `SELECT post.id, post.content, post.content_type, post.content_url, users.username, users.full_name, users.image as user_image FROM post left join users on users.id = post.user_id LEFT join follower on follower.user_id = post.user_id WHERE follower.follower_user_id = ${checkToken.id} ORDER BY post.created_on  limit 10 offset ${pageNumber * 10}`
         }else{
             let categoryIn = (category) ? category : '';
             let sqlforgetcategoryId = `SELECT * FROM post_categories WHERE title = '${categoryIn}'`
@@ -43,13 +43,12 @@ exports.feed = async (req,res) =>
         let getData = await common.customQuery(sqlQryForFeed);
         console.log(getData);
         if (getData.data.length > 0){
-          
                 responseObj = getData.data;
                 let result = [];
                 for (let i = 0; i < responseObj.length; i++ ){
                     let data = responseObj[i]
                     let prepareRes = await fetchData(data,checkToken.id);
-                    result.push(prepareRes) ;
+                    result.push(prepareRes);
                 }
                 let resp = {
                     status : 200,

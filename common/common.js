@@ -63,7 +63,7 @@ module.exports =
                     //     where = 'id =' + where;
                     // }
                     let sql = `SELECT ${(fields)} FROM ${table} WHERE ${where}`;
-                    
+                
                     try {
 
                         dbConnection.query(sql, async (err, result) => {

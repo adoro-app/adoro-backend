@@ -13,6 +13,7 @@ const multer    = require('multer');
 const upload    = multer({dest : 'uploads/'});
 const comment   = require('./controllers/comment/commentController')
 const campaign  = require('./controllers/campaign&contest/campaignContestController')
+const template  = require('./controllers/templates/templateControllers')
 
 router.route('/signup').post(signup.userSignUp);
 router.route('/login').post(signup.login);
@@ -154,8 +155,17 @@ router.post("/applyContest", upload.single('media'), (req, res) => {
     campaign.applyContest(req,res)
 });
 
-router.get("/getPostById",  (req, res) => {
-    post.getPostById(req,res)
+router.post("/uploadTemplate",  upload.single('template'), (req, res) => {
+    template.uploadTemplate(req,res)
 });
 
+router.get("/listTemplates",  (req, res) => {
+    template.listTemplates(req,res)
+});
+router.get("/getMyTemplates",  (req, res) => {
+    template.getMyTemplates(req,res)
+});
+router.get("/getTrendingTemplates",  (req, res) => {
+    template.getTrendingTemplates(req,res)
+});
 module.exports = router;

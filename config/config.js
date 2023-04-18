@@ -22,6 +22,9 @@ module.exports =
 	"aws_bucket_name_brand" : 'adoro/brand',
 	"aws_bucket_name_campaign":'adoro/userAppliedcampaign',
 	"aws_bucket_name_contest" : 'adoro/userAppliedContests',
+	"aws_bucket_name_template_standard" : 'adoro/templates/standard',
+	"aws_bucket_name_template_licensed" : 'adoro/templates/licensed',
+
 	"AWS_CREDENTIAL"     :{
 		"accessKeyId":"AKIA4EZQCBCZLYFKLJGU",
 		"secretAccessKey":"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"

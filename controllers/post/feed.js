@@ -25,12 +25,12 @@ exports.feed = async (req,res) =>
      {
         let sqlQryForFeed = '';
         if (category == 'trending'){
-             sqlQryForFeed = `SELECT p.id, p.id, p.content, p.content_type, p.content_url, p.created_on, count(*) as noOfLikes 
+             sqlQryForFeed = `SELECT p.id, p.id, p.content, p.content_type, p.content_url, p.tag, p.created_on, count(*) as noOfLikes 
              FROM likes l RIGHT JOIN post p ON l.post_id = p.id
              GROUP BY l.post_id 
              ORDER BY noOfLikes DESC limit 10 offset ${pageNumber * 10}`
         }else if(category == 'relevant'){
-            sqlQryForFeed = `SELECT post.id, post.content, post.content_type, post.content_url, users.username, users.full_name, users.image as user_image FROM post left join users on users.id = post.user_id LEFT join follower on follower.user_id = post.user_id WHERE follower.follower_user_id = ${checkToken.id} ORDER BY post.created_on  limit 10 offset ${pageNumber * 10}`
+            sqlQryForFeed = `SELECT post.id, post.content, post.content_type, post.content_url, post.tag, users.username, users.full_name, users.image as user_image FROM post left join users on users.id = post.user_id LEFT join follower on follower.user_id = post.user_id WHERE follower.follower_user_id = ${checkToken.id} ORDER BY post.created_on  limit 10 offset ${pageNumber * 10}`
         }else{
             let categoryIn = (category) ? category : '';
             let sqlforgetcategoryId = `SELECT * FROM post_categories WHERE title = '${categoryIn}'`
@@ -68,36 +68,47 @@ exports.feed = async (req,res) =>
         res.send(response.UnauthorizedUser(checkToken))
      }
     } catch (error) {
-
+        console.log(error)
      res.send(error);
   }
 }
 
 async function fetchData(res, uid){
-    return new Promise(async (resolve, reject)=>{
-        let sqlForFetchLikes = `SELECT users.id, users.username, users.full_name, users.image FROM post LEFT JOIN likes ON post.id = likes.post_id LEFT JOIN users on likes.user_id = users.id WHERE post.id = ${res.id}`;
-        let FetchLikes = await common.customQuery(sqlForFetchLikes);
-        FetchLikes = (FetchLikes.data) ? FetchLikes.data : ''
-       console.log(FetchLikes)
-        if(FetchLikes.length > 0 && FetchLikes[0].id != null){
-            res['likedByPeople'] = FetchLikes;
-            res['likedByMe'] = false;
-            for (let j = 0; j < FetchLikes.length; j++){
-                
-                if (uid == FetchLikes[j].id){
-                    res['likedByMe'] = true;
+    try{
+        return new Promise(async (resolve, reject)=>{
+            let sqlForFetchLikes = `SELECT users.id, users.username, users.full_name, users.image FROM post LEFT JOIN likes ON post.id = likes.post_id LEFT JOIN users on likes.user_id = users.id WHERE post.id = ${res.id}`;
+            let FetchLikes = await common.customQuery(sqlForFetchLikes);
+            FetchLikes = (FetchLikes.data) ? FetchLikes.data : ''
+           console.log(FetchLikes)
+            if(FetchLikes.length > 0 && FetchLikes[0].id != null){
+                res['likedByPeople'] = FetchLikes;
+                res['likedByMe'] = false;
+                for (let j = 0; j < FetchLikes.length; j++){
+                    
+                    if (uid == FetchLikes[j].id){
+                        res['likedByMe'] = true;
+                    }
+        
                 }
-    
             }
-        }
-        let sqlForGetAllCommentsCount = `SELECT COUNT(*) as total_comments FROM comments  WHERE post_id = ${res.id}`;
-        let fetchCommentsCount = await common.customQuery(sqlForGetAllCommentsCount);
-        res['comments'] = fetchCommentsCount.data[0].total_comments;
-        let sqlForFetchUserWhoLikesPost = `SELECT id, username, full_name, image  FROM users WHERE id = ${res.id}`;
-        let FetchUser = await common.customQuery(sqlForFetchUserWhoLikesPost);
-        res['author'] = FetchUser.data
-        resolve(res)
-    })
+            let sqlForGetAllCommentsCount = `SELECT COUNT(*) as total_comments FROM comments  WHERE post_id = ${res.id}`;
+            let fetchCommentsCount = await common.customQuery(sqlForGetAllCommentsCount);
+            res['comments'] = fetchCommentsCount.data[0].total_comments;
+            if(!!res.tag) {
+               
+                let sqlForFetchUsertag = `SELECT id, username, full_name, image  FROM users WHERE id IN ${res.tag}`;
+                let FetchUsertag = await common.customQuery(sqlForFetchUsertag);
+                res['tag_user'] = FetchUsertag.data
+            }
+           
+            resolve(res)
+        })
+
+    }catch(err){
+        console.log(err)
+        throw err
+    }
+    
 }
 
 exports.like = async (req, res)=>{
@@ -179,7 +190,9 @@ exports.like = async (req, res)=>{
                     content : req.body.content,
                     content_type : req.body.content_type,
                     content_url : data.Location,
+                    tag : req.body.tag,
                     created_on : currentDate
+                    
                 }
                 
                 let addObj = await common.AddRecords('post', addobj )

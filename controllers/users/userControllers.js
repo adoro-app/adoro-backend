@@ -6,7 +6,8 @@ const moment = require('moment');
 const AWS = require('aws-sdk'); 
 // const multer = require('multer');
 const path = require('path');
-const { get } = require('underscore');
+// const { get } = require('underscore');
+const response = require('../../constant/response');
 
 const s3 = new AWS.S3({
     accessKeyId: config.AWS_CREDENTIAL.accessKeyId,
@@ -92,7 +93,7 @@ exports.upload_profile_pic = async (req, res) => {
     let checkToken = await common.checkToken(req.headers);
     let datenow = new Date()
     let currentDate = moment(datenow).format('YYYY-MM-DD HH:mm:ss');
-    
+   
     if(checkToken.id){
       console.log(req.file.fieldname)
         const filestream = fs.createReadStream(req.file.path)

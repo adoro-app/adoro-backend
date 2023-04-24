@@ -169,13 +169,14 @@ exports.like = async (req, res)=>{
             let checkToken = await common.checkToken(req.headers);
             let datenow = new Date()
             let currentDate = moment(datenow).format('YYYY-MM-DD HH:mm:ss');
+            console.log(req.file)
             
             if(checkToken.id){
                 console.log(req.file)
                 const filestream = fs.createReadStream(req.file.path)
                 const params = {
                     Bucket: config.aws_bucket_name_post,
-                    Key: `${req.file.filename}.jpg`,
+                    Key: req.file.originalname,
                     Body: filestream
                 }
                 

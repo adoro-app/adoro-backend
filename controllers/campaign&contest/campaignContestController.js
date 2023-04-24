@@ -36,21 +36,24 @@ const s3 = new AWS.S3({
                 if (getAllCampaign.data.length > 0 || getAllContests.data.length > 0){
                     for (let i = 0; i < getAllCampaign.data.length; i++){
                         let flag = "false";
-                        let checkAppliedCampaign = `SELECT * FROM user_applied_campaign WHERE user_id = '${checkToken.id}' AND campaign_id = '${getAllCampaign.data.id}' `
+                        
+                        let checkAppliedCampaign = `SELECT * FROM user_applied_campaign WHERE user_id = '${checkToken.id}' AND campaign_id = '${getAllCampaign.data[i].id}' `
+                        console.log(checkAppliedCampaign)
                         let getAppliedCampaign = await common.customQuery(checkAppliedCampaign);
+                        console.log(getAppliedCampaign.data)
                         if(getAppliedCampaign.data.length > 0){
                             flag = "true"
                         }
                         getAllCampaign.data[i]['applied'] = flag
                     }
-                    for (let i = 0; i < getAllContests.data.length; i++){
+                    for (let j = 0; j < getAllContests.data.length; j++){
                         let flagForCon = "false";
-                        let checkAppliedContest = `SELECT * FROM user_applied_contest WHERE user_id = '${checkToken.id}' AND contest_id = '${getAllCampaign.data.contest_id}' `
+                        let checkAppliedContest = `SELECT * FROM user_applied_contest WHERE user_id = '${checkToken.id}' AND contest_id = '${getAllCampaign.data[j].contest_id}' `
                         let getAppliedContest = await common.customQuery(checkAppliedContest);
                         if(getAppliedContest.data.length > 0){
                             flagForCon = "true"
                         }
-                        getAllContests.data[i]['applied'] = flagForCon
+                        getAllContests.data[j]['applied'] = flagForCon
                     }
                     let response = {
                         status : 200,
@@ -89,7 +92,7 @@ const s3 = new AWS.S3({
                 const filestream = fs.createReadStream(req.file.path)
                 const params = {
                     Bucket: config.aws_bucket_name_campaign,
-                    Key: `${req.file.filename}.jpg`,
+                    Key: req.file.originalname,
                     Body: filestream
                 }
                 // console.log(params)
@@ -147,7 +150,7 @@ const s3 = new AWS.S3({
                 const filestream = fs.createReadStream(req.file.path)
                 const params = {
                     Bucket: config.aws_bucket_name_contest,
-                    Key: `${req.file.filename}.jpg`,
+                    Key: req.file.originalname,
                     Body: filestream
                 }
                 // console.log(params)

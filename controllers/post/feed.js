@@ -26,20 +26,30 @@ exports.feed = async (req,res) =>
         let sqlQryForFeed = '';
         if (category == 'trending'){
              sqlQryForFeed = `SELECT p.id, p.id, p.content, p.content_type, p.content_url, p.tag, p.created_on, count(*) as noOfLikes 
-             FROM likes l RIGHT JOIN post p ON l.post_id = p.id
+             FROM post p LEFT JOIN likes l ON  p.id = l.post_id
+             LEFT JOIN user_report_post ON p.id = user_report_post.post_id AND user_report_post.user_id = ${checkToken.id}
+            WHERE user_report_post.id IS NULL
              GROUP BY l.post_id 
              ORDER BY noOfLikes DESC limit 10 offset ${pageNumber * 10}`
         }else if(category == 'relevant'){
-            sqlQryForFeed = `SELECT post.id, post.content, post.content_type, post.content_url, post.tag, users.username, users.full_name, users.image as user_image FROM post left join users on users.id = post.user_id LEFT join follower on follower.user_id = post.user_id WHERE follower.follower_user_id = ${checkToken.id} ORDER BY post.created_on  limit 10 offset ${pageNumber * 10}`
+            sqlQryForFeed = `SELECT post.id, post.content, post.content_type, post.content_url, post.tag, users.username, users.full_name, users.image as user_image FROM post left join users on users.id = post.user_id LEFT join follower on follower.user_id = post.user_id 
+            LEFT JOIN user_report_post ON post.id = user_report_post.post_id AND user_report_post.user_id = 2
+            WHERE user_report_post.id IS NULL AND
+            follower.follower_user_id = ${checkToken.id} ORDER BY post.created_on
+            limit 10 offset ${pageNumber * 10}`
         }else{
             let categoryIn = (category) ? category : '';
             let sqlforgetcategoryId = `SELECT * FROM post_categories WHERE title = '${categoryIn}'`
             let getcategoryId = await common.customQuery(sqlforgetcategoryId);
             let categoryId = getcategoryId.data[0].id;
             
-            sqlQryForFeed = `SELECT * FROM post WHERE category_id = '${categoryId}' limit 10 offset ${pageNumber * 10}`
+            sqlQryForFeed = `SELECT p.id, p.id, p.content, p.content_type, p.content_url, p.tag, p.created_on 
+            FROM post p  
+            LEFT JOIN user_report_post ON p.id = user_report_post.post_id AND user_report_post.user_id = ${checkToken.id}
+            WHERE user_report_post.id IS NULL AND
+            p.category_id = ${categoryId} limit 10 offset ${pageNumber * 10}`
         }
-        console.log(sqlQryForFeed)
+        // console.log(sqlQryForFeed)
         let getData = await common.customQuery(sqlQryForFeed);
         console.log(getData);
         if (getData.data.length > 0){
@@ -79,7 +89,7 @@ async function fetchData(res, uid){
             let sqlForFetchLikes = `SELECT users.id, users.username, users.full_name, users.image FROM post LEFT JOIN likes ON post.id = likes.post_id LEFT JOIN users on likes.user_id = users.id WHERE post.id = ${res.id}`;
             let FetchLikes = await common.customQuery(sqlForFetchLikes);
             FetchLikes = (FetchLikes.data) ? FetchLikes.data : ''
-           console.log(FetchLikes)
+        //    console.log(FetchLikes)
             if(FetchLikes.length > 0 && FetchLikes[0].id != null){
                 res['likedByPeople'] = FetchLikes;
                 res['likedByMe'] = false;
@@ -360,7 +370,46 @@ exports.like = async (req, res)=>{
        
         
     }
-
+    exports.reportPost = async (req, res)=>{
+    
+        try{
+            let postId = req.body.post_id;
+            let checkToken = await common.checkToken(req.headers);
+            console.log(checkToken)
+            let datenow = new Date()
+            let currentDate = moment(datenow).format('YYYY-MM-DD HH:mm:ss');
+            if(checkToken.id ){
+               
+                    let addobj = {
+                        "user_id" : checkToken.id,
+                        "post_id": postId,
+                        "created_on": currentDate
+                    }
+                   let addRecords = await common.AddRecords('user_report_post', addobj )
+                    if(addRecords.data.affectedRows == 1){
+                        let response = {
+                            status : 200,
+                            msg : 'Successfull'
+                        }
+                        res.send(response)
+                    }else{
+                        let response = {
+                            status : 500,
+                            msg : 'Something went wrong'
+                        }
+                        res.send(response)
+                    }
+                
+            }else{
+                res.send(response.UnauthorizedUser(checkToken))
+            }
+           
+        }catch(err){
+            throw err;
+        }
+       
+        
+    }
 
   
 

@@ -168,4 +168,8 @@ router.get("/getMyTemplates",  (req, res) => {
 router.get("/getTrendingTemplates",  (req, res) => {
     template.getTrendingTemplates(req,res)
 });
+
+router.post("/reportPost", (req, res) => {
+    post.reportPost(req,res)
+});
 module.exports = router;

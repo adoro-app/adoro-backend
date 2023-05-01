@@ -91,14 +91,23 @@ exports.sendFollowRequest = async (req, res)=>{
     exports.deleteFollowRequest = async (req, res)=>{
     
         try{
+            
             let id = req.body.id;
+            let flag = (req.body.flag) ? req.body.flag : ''; 
+            
             let checkToken = await common.checkToken(req.headers);
             let datenow = new Date()
             let currentDate = moment(datenow).format('YYYY-MM-DD HH:mm:ss');
             // console.log(checkToken)
             if(checkToken.id){
-                let addRecord = await common.deleteRecords('follower', `id = ${id}` )
-                if(addRecord ){
+                let deleteRecord;
+                if (flag == 'feed'){
+                     deleteRecord = await common.deleteRecords('follower', `user_id = ${id} AND follower_user_id = ${checkToken.id}` )
+                }else{
+                     deleteRecord = await common.deleteRecords('follower', `id = ${id}` )
+                }
+                
+                if(deleteRecord ){
 
                     let response = {
                         status : 200,

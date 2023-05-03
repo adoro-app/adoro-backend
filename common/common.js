@@ -16,7 +16,8 @@ switch (_SERVER) {
             password: config.MYSQL_CREDENTIAL_PRODUCTION.PASSWORD,
             port : config.MYSQL_CREDENTIAL_PRODUCTION.PORT,
             database: config.MYSQL_CREDENTIAL_PRODUCTION.DATABASE,
-            dateStrings: true
+            dateStrings: true,
+            charset : 'utf8mb4'
         });
         break;
     case "Development":
@@ -25,7 +26,8 @@ switch (_SERVER) {
             user: config.MYSQL_CREDENTIAL_DEVELOPMENT.USER,
             password: config.MYSQL_CREDENTIAL_DEVELOPMENT.PASSWORD,
             database: config.MYSQL_CREDENTIAL_DEVELOPMENT.DATABASE,
-            dateStrings: true
+            dateStrings: true,
+            charset : 'utf8mb4'
 
         });
         break;
@@ -35,7 +37,8 @@ switch (_SERVER) {
             user: "root",
             password: "",
             database: "barcindia_sdk",
-            dateStrings: true
+            dateStrings: true,
+            charset : 'utf8mb4'
         });
         break;
 }

@@ -9,8 +9,9 @@ exports.userSignUp = async (req,res) =>
       let mobileNo = (req.body.mobileNo) ? req.body.mobileNo : "";
       let username = (req.body.username) ? req.body.username : ""
       let email = (req.body.email) ? req.body.email : ""
+      let full_name = (req.body.full_name) ? req.body.full_name : ""
       
-      if (mobileNo != "" && mobileNo.length == 10){ 
+      if (mobileNo != "" && mobileNo.length == 10 ){ 
         let GetRecords = await common.GetRecords(config.userTable, 'id', `mobileNo =${mobileNo}` )
         if(GetRecords.data.length > 0) {
           let response = {
@@ -23,6 +24,7 @@ exports.userSignUp = async (req,res) =>
           let insertObj = {
             mobileNo : mobileNo,
             username : username,
+            full_name: full_name,
             email : email,
             otp : generateOtp
           }

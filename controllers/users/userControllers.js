@@ -157,3 +157,75 @@ exports.upload_profile_pic = async (req, res) => {
   }
 }
 
+exports.getProfileById = async (req, res) => {
+  console.log(req.query)
+  try{
+    let checkToken = await common.checkToken(req.headers);
+    let userId, my_profile = false;
+    if(req.query.userId){
+       userId = req.query.userId
+    }else{
+      my_profile = true;
+      userId = checkToken.id
+    }
+    
+    let getuserdetails = await common.GetRecords(config.userTable, '*', `id = ${userId}`)
+    if(getuserdetails.data.length > 0){
+      
+      let sql = `SELECT u.id, u.username, u.full_name, u.image, u.cover_photo, 
+                  COUNT(DISTINCT f.follower_user_id) AS followers_count, 
+                  COUNT(DISTINCT f.user_id) AS following_count, 
+                  COUNT(DISTINCT p.id) AS posts_count
+                  FROM users u 
+                  LEFT JOIN follower f ON f.follower_user_id = u.id 
+                  LEFT JOIN post p ON p.user_id = u.id 
+                  WHERE u.id = ${userId} AND f.status = 'accepted'
+                  GROUP BY u.id
+                `
+      let getProfile = await common.customQuery(sql);
+      let sqlForPost = `SELECT p.id, p.content, p.content_type, p.content_url, p.created_on, 
+      u.id AS user_id, u.username AS user_username, u.full_name AS user_full_name, u.image AS user_image, u.cover_photo AS user_cover_photo, 
+      (SELECT COUNT(*) FROM likes WHERE post_id = p.id) AS likes_count, 
+      (SELECT COUNT(*) FROM comments WHERE post_id = p.id) AS comments_count 
+      FROM post p 
+      LEFT JOIN users u ON p.user_id = u.id 
+      WHERE p.user_id = ${userId}
+      GROUP BY p.id, u.id
+`
+      let getPostData = await common.customQuery(sqlForPost);
+      getProfile.data[0]['posts'] = getPostData.data
+      
+      let sqlFormentionedPost = `SELECT p.id, p.content, p.content_type, p.content_url, p.created_on 
+      FROM post p WHERE p.tag LIKE '%${userId}%';
+      
+      
+`
+      console.log(sqlFormentionedPost)
+      let getmentioneData = await common.customQuery(sqlFormentionedPost);
+      console.log(getmentioneData)
+      getProfile.data[0]['mention'] = getmentioneData.data
+      if(my_profile == false){
+      let sqlForFollowedByMe = `SELECT id FROM follower WHERE follower_user_id = ${checkToken.id} AND user_id = ${userId}`
+      let FetchFollowedUser = await common.customQuery(sqlForFollowedByMe);
+      if(FetchFollowedUser.data.length > 0){
+        getProfile.data[0]['followedByMe'] = true
+      }else{
+        getProfile.data[0]['followedByMe'] = false
+      }
+      }
+      
+      await res.send(getProfile);
+    
+    }else{
+      let response = {
+        status : 500,
+        msg : 'No user found.',
+       
+      }
+      await res.send(response);
+    }
+
+  }catch(err){
+    await res.send(err);
+  }
+}

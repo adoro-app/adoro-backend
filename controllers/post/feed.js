@@ -62,8 +62,8 @@ exports.feed = async (req,res) =>
      FROM post p  
      LEFT JOIN users ON p.user_id = users.id
      LEFT JOIN likes l ON p.id = l.post_id
-     LEFT JOIN user_report_post urp ON p.id = urp.post_id AND urp.user_id = 3
-     WHERE urp.id IS NULL AND l.id IS NOT NULL AND p.category_id = 5
+     LEFT JOIN user_report_post urp ON p.id = urp.post_id AND urp.user_id = ${checkToken.id}
+     WHERE urp.id IS NULL AND l.id IS NOT NULL AND p.category_id = ${categoryId}
      GROUP BY p.id
      ORDER BY p.created_on DESC
      LIMIT 10 offset ${pageNumber * 10}`

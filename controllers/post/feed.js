@@ -19,6 +19,7 @@ exports.feed = async (req,res) =>
     let responseObj = {}
      let category = req.query.category;
      let pageNumber = req.query.pageNumber;
+     console.log('token==', req.headers)
      let checkToken = await common.checkToken(req.headers);
     //  console.log(checkToken)
      if (checkToken.id)

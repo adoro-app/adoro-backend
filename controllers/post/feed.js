@@ -20,40 +20,53 @@ exports.feed = async (req,res) =>
      let category = req.query.category;
      let pageNumber = req.query.pageNumber;
      let checkToken = await common.checkToken(req.headers);
-     console.log(checkToken)
+    //  console.log(checkToken)
      if (checkToken.id)
      {
         let sqlQryForFeed = '';
         if (category == 'trending'){
-             sqlQryForFeed = `SELECT p.id, p.id, p.user_id, p.content, p.content_type, p.content_url, p.tag, p.created_on, users.username, users.full_name, users.image, count(*) as noOfLikes 
-             FROM post p LEFT JOIN likes l ON  p.id = l.post_id
-             LEFT JOIN users on p.user_id = users.id
-             LEFT JOIN user_report_post ON p.id = user_report_post.post_id AND user_report_post.user_id = ${checkToken.id}
-            WHERE user_report_post.id IS NULL
-             GROUP BY l.post_id 
-             ORDER BY noOfLikes DESC limit 10 offset ${pageNumber * 10}`
+             sqlQryForFeed = `SELECT p.id, p.user_id, p.content, p.content_type, p.content_url, p.tag, p.created_on, users.username, users.full_name, users.image, COUNT(l.id) AS noOfLikes 
+             FROM post p 
+             LEFT JOIN likes l ON p.id = l.post_id
+             LEFT JOIN users ON p.user_id = users.id
+             LEFT JOIN user_report_post urp ON p.id = urp.post_id AND urp.user_id = ${checkToken.id}
+             WHERE urp.id IS NULL AND l.id IS NOT NULL AND p.created_on >= DATE_SUB(NOW(), INTERVAL 60 DAY)
+             GROUP BY p.id
+             HAVING noOfLikes > 0
+             ORDER BY noOfLikes DESC
+             LIMIT 10
+             
+                   
+              offset ${pageNumber * 10}`
         }else if(category == 'relevant'){
-            sqlQryForFeed = `SELECT post.id, post.content, post.user_id, post.content_type, post.content_url, post.tag, users.username, users.full_name, users.image as user_image 
+            sqlQryForFeed = `SELECT post.id, post.content, post.user_id, post.content_type, post.content_url, post.tag, users.username, users.full_name, users.image as user_image, COUNT(l.id) AS noOfLikes
             FROM post 
-            LEFT join follower on follower.user_id = post.user_id 
-            LEFT JOIN users on post.user_id = users.id
+            LEFT JOIN follower ON follower.user_id = post.user_id AND follower.status = 'accepted'
+            LEFT JOIN users ON post.user_id = users.id
+            LEFT JOIN likes l ON post.id = l.post_id
             LEFT JOIN user_report_post ON post.id = user_report_post.post_id AND user_report_post.user_id = ${checkToken.id}
-            WHERE user_report_post.id IS NULL AND
-            follower.follower_user_id = ${checkToken.id} ORDER BY post.created_on
-            limit 10 offset ${pageNumber * 10}`
+            WHERE user_report_post.id IS NULL AND l.id IS NOT NULL AND follower.follower_user_id = ${checkToken.id} 
+            GROUP BY post.id
+            ORDER BY post.created_on DESC
+            LIMIT 10
+            
+             offset ${pageNumber * 10}`
         }else{
             let categoryIn = (category) ? category : '';
             let sqlforgetcategoryId = `SELECT * FROM post_categories WHERE title = '${categoryIn}'`
             let getcategoryId = await common.customQuery(sqlforgetcategoryId);
             let categoryId = getcategoryId.data[0].id;
             
-            sqlQryForFeed = `SELECT p.id, p.id, p.user_id, p.content, p.content_type, p.content_url, p.tag, p.created_on,
-            users.username, users.full_name, users.image
-            FROM post p  
-            LEFT JOIN users on p.user_id = users.id
-            LEFT JOIN user_report_post ON p.id = user_report_post.post_id AND user_report_post.user_id = ${checkToken.id}
-            WHERE user_report_post.id IS NULL AND
-            p.category_id = ${categoryId} limit 10 offset ${pageNumber * 10}`
+            sqlQryForFeed = `SELECT p.id, p.user_id, p.content, p.content_type, p.content_url, p.tag, p.created_on,
+            users.username, users.full_name, users.image, COUNT(DISTINCT l.id) AS noOfLikes
+     FROM post p  
+     LEFT JOIN users ON p.user_id = users.id
+     LEFT JOIN likes l ON p.id = l.post_id
+     LEFT JOIN user_report_post urp ON p.id = urp.post_id AND urp.user_id = 3
+     WHERE urp.id IS NULL AND l.id IS NOT NULL AND p.category_id = 5
+     GROUP BY p.id
+     ORDER BY p.created_on DESC
+     LIMIT 10 offset ${pageNumber * 10}`
         }
         console.log(sqlQryForFeed)
         let getData = await common.customQuery(sqlQryForFeed);
@@ -62,8 +75,8 @@ exports.feed = async (req,res) =>
                 responseObj = getData.data;
                 let result = [];
                 for (let i = 0; i < responseObj.length; i++ ){
-                    let data = responseObj[i]
-                    let prepareRes = await fetchData(data,checkToken.id);
+                    // console.log(responseObj[i])
+                    let prepareRes = await fetchData(responseObj[i],checkToken.id);
                     result.push(prepareRes);
                 }
                 let resp = {
@@ -92,13 +105,15 @@ exports.feed = async (req,res) =>
 async function fetchData(res, uid){
     try{
         return new Promise(async (resolve, reject)=>{
-            console.log('ereeeeee')
-            console.log(res)
-            let sqlForFetchLikes = `SELECT users.id, users.username, users.full_name, users.image FROM post LEFT JOIN likes ON post.id = likes.post_id LEFT JOIN users on likes.user_id = users.id WHERE post.id = ${res.id}`;
+            // console.log('ereeeeee')
+            // console.log(res)
+            let sqlForFetchLikes = `SELECT post.id, users.id, users.username, users.full_name, users.image FROM post LEFT JOIN likes ON post.id = likes.post_id LEFT JOIN users on likes.user_id = users.id WHERE post.id = ${res.id}`;
+            // console.log(sqlForFetchLikes)
             let FetchLikes = await common.customQuery(sqlForFetchLikes);
             FetchLikes = (FetchLikes.data) ? FetchLikes.data : ''
         //    console.log('fetch like==>>',FetchLikes)
             if(FetchLikes.length > 0 && FetchLikes[0].id != null){
+                // console.log('============',FetchLikes)
                 res['likedByPeople'] = FetchLikes;
                 res['likedByMe'] = false;
                 for (let j = 0; j < FetchLikes.length; j++){
@@ -112,11 +127,11 @@ async function fetchData(res, uid){
             }
             let sqlForGetAllCommentsCount = `SELECT COUNT(*) as total_comments FROM comments  WHERE post_id = ${res.id}`;
             let fetchCommentsCount = await common.customQuery(sqlForGetAllCommentsCount);
-            console.log('fetchcomment', fetchCommentsCount.data[0].total_comments)
+            // console.log('fetchcomment', fetchCommentsCount.data[0].total_comments)
             res['comments'] = fetchCommentsCount.data[0].total_comments;
             
             if(!! res.tag) {
-               console.log('here')
+            //    console.log('here')
                 let sqlForFetchUsertag = `SELECT id, username, full_name, image  FROM users WHERE id IN ${res.tag}`;
                 let FetchUsertag = await common.customQuery(sqlForFetchUsertag);
                 res['tag_user'] = FetchUsertag.data
@@ -174,7 +189,7 @@ exports.like = async (req, res)=>{
                 } else{
                     let response = {
                         status : 500,
-                        msg : 'Something went wrong.'
+                        msg : 'Already liked.'
                     }
                     res.send(response)
                 }
@@ -396,27 +411,37 @@ exports.like = async (req, res)=>{
             console.log(checkToken)
             let datenow = new Date()
             let currentDate = moment(datenow).format('YYYY-MM-DD HH:mm:ss');
+            let getUser = await common.GetRecords('user_report_post','id', `post_id = ${postId} AND user_id = ${checkToken.id}`);
+              
             if(checkToken.id ){
-               
-                    let addobj = {
-                        "user_id" : checkToken.id,
-                        "post_id": postId,
-                        "created_on": currentDate
+               if(getUser.data.length == 0){
+                let addobj = {
+                    "user_id" : checkToken.id,
+                    "post_id": postId,
+                    "created_on": currentDate
+                }
+               let addRecords = await common.AddRecords('user_report_post', addobj )
+                if(addRecords.data.affectedRows == 1){
+                    let response = {
+                        status : 200,
+                        msg : 'Successfull'
                     }
-                   let addRecords = await common.AddRecords('user_report_post', addobj )
-                    if(addRecords.data.affectedRows == 1){
-                        let response = {
-                            status : 200,
-                            msg : 'Successfull'
-                        }
-                        res.send(response)
-                    }else{
-                        let response = {
-                            status : 500,
-                            msg : 'Something went wrong'
-                        }
-                        res.send(response)
+                    res.send(response)
+                }else{
+                    let response = {
+                        status : 500,
+                        msg : 'Something went wrong'
                     }
+                    res.send(response)
+                }
+               }else{
+                let response = {
+                    status : 500,
+                    msg : 'Already reported.'
+                }
+                res.send(response)
+               }
+                    
                 
             }else{
                 res.send(response.UnauthorizedUser(checkToken))

@@ -40,6 +40,7 @@ exports.uploadTemplate = async (req, res) => {
                 let addobj = {
                     user_id: checkToken.id,
                     tag: tag,
+                    caption:req.body.caption,
                     template_url: data.Location,
                     created_on: currentDate
                 }

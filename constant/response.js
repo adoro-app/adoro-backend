@@ -1,7 +1,7 @@
 module.exports = {
     fetchRecordSuccessResponse: function (data) {
       var responseObj ={};
-      responseObj.status = 1;
+      responseObj.status = 200;
       responseObj.message = "Record found";
       responseObj.data = data;
       return responseObj;

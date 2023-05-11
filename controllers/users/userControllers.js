@@ -158,31 +158,32 @@ exports.upload_profile_pic = async (req, res) => {
 }
 
 exports.getProfileById = async (req, res) => {
-  console.log(req.query)
+  // console.log(req.query)
   try{
     let checkToken = await common.checkToken(req.headers);
     let userId, my_profile = false;
-    if(req.query.userId){
-       userId = req.query.userId
-    }else{
-      my_profile = true;
-      userId = checkToken.id
-    }
+    my_profile = (checkToken.id == req.query.userId) ? true : false;
+    userId = (req.query.userId) ? req.query.userId : '';
+    let tag = ''
+    
     
     let getuserdetails = await common.GetRecords(config.userTable, '*', `id = ${userId}`)
     if(getuserdetails.data.length > 0){
       
       let sql = `SELECT u.id, u.username, u.full_name, u.image, u.cover_photo, 
-                  COUNT(DISTINCT f.follower_user_id) AS followers_count, 
-                  COUNT(DISTINCT f.user_id) AS following_count, 
-                  COUNT(DISTINCT p.id) AS posts_count
-                  FROM users u 
-                  LEFT JOIN follower f ON f.follower_user_id = u.id 
-                  LEFT JOIN post p ON p.user_id = u.id 
-                  WHERE u.id = ${userId} AND f.status = 'accepted'
-                  GROUP BY u.id
-                `
+      COUNT(DISTINCT f.follower_user_id) AS followers_count, 
+      COUNT(DISTINCT f.user_id) AS following_count, 
+      COUNT(DISTINCT p.id) AS posts_count
+      FROM users u 
+      LEFT JOIN follower f ON f.follower_user_id = u.id AND f.status = 'accepted'
+      LEFT JOIN post p ON p.user_id = u.id 
+      WHERE u.id = ${userId} 
+      GROUP BY u.id
+      LIMIT 1`
+                
       let getProfile = await common.customQuery(sql);
+      // console.log('==',getProfile)
+      getProfile['my_profile'] = my_profile;
       let sqlForPost = `SELECT p.id, p.content, p.content_type, p.content_url, p.created_on, 
       u.id AS user_id, u.username AS user_username, u.full_name AS user_full_name, u.image AS user_image, u.cover_photo AS user_cover_photo, 
       (SELECT COUNT(*) FROM likes WHERE post_id = p.id) AS likes_count, 
@@ -194,26 +195,41 @@ exports.getProfileById = async (req, res) => {
 `
       let getPostData = await common.customQuery(sqlForPost);
       getProfile.data[0]['posts'] = getPostData.data
+      // console.log(getProfile)
+//       let sqlFormentionedPost = `SELECT p.id, p.content, p.content_type, p.content_url, p.created_on 
+//       FROM post p WHERE p.tag LIKE '%${userId}%';
       
-      let sqlFormentionedPost = `SELECT p.id, p.content, p.content_type, p.content_url, p.created_on 
-      FROM post p WHERE p.tag LIKE '%${userId}%';
-      
-      
-`
-      console.log(sqlFormentionedPost)
-      let getmentioneData = await common.customQuery(sqlFormentionedPost);
-      console.log(getmentioneData)
-      getProfile.data[0]['mention'] = getmentioneData.data
-      if(my_profile == false){
-      let sqlForFollowedByMe = `SELECT id FROM follower WHERE follower_user_id = ${checkToken.id} AND user_id = ${userId}`
+// `     
+//       let getmentioneData = await common.customQuery(sqlFormentionedPost);
+      // console.log(getmentioneData)
+      getProfile.data[0]['mention'] = []
+      // if(my_profile == false){
+      let sqlForFollowedByMe = `SELECT id FROM follower WHERE follower_user_id = ${checkToken.id} AND user_id = ${userId} AND status = 'accepted'`
       let FetchFollowedUser = await common.customQuery(sqlForFollowedByMe);
-      if(FetchFollowedUser.data.length > 0){
-        getProfile.data[0]['followedByMe'] = true
-      }else{
-        getProfile.data[0]['followedByMe'] = false
-      }
-      }
+      let sqlForFollowedByHim = `SELECT id FROM follower WHERE follower_user_id = ${userId} AND user_id = ${checkToken.id} AND status = 'accepted'`
+      let FetchFollowedHim = await common.customQuery(sqlForFollowedByHim);
       
+      let sqlForPendingReq = `SELECT id FROM follower WHERE follower_user_id = ${userId} AND user_id = ${checkToken.id} AND status = 'pending'`
+      let Fetchpendingreq= await common.customQuery(sqlForPendingReq);
+     
+      if(FetchFollowedUser.data.length > 0 && FetchFollowedHim.data.length > 0 && my_profile == false){
+        getProfile.data[0]['tag'] = 'Following'
+      }else if(FetchFollowedUser.data.length > 0 && FetchFollowedHim.data.length == 0 && my_profile == false){
+        getProfile.data[0]['tag'] = 'Following'
+      }else if(FetchFollowedUser.data.length == 0 && FetchFollowedHim.data.length > 0 && my_profile == false){
+        getProfile.data[0]['tag'] = 'Follow Back'
+      }else if(FetchFollowedUser.data.length == 0 && FetchFollowedHim.data.length == 0 && my_profile == false){
+        getProfile.data[0]['tag'] = 'Follow'
+      }else if(Fetchpendingreq.data.length > 0  && my_profile == false){
+        getProfile.data[0]['tag'] = 'Confirm'
+      }else if(my_profile == true){
+        getProfile.data[0]['tag'] = 'Edit Profile'
+      }else{
+        getProfile.data[0]['tag'] = ''
+      }
+      // }
+     
+      // console.log(getProfile)
       await res.send(getProfile);
     
     }else{

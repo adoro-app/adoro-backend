@@ -14,6 +14,7 @@ const upload    = multer({dest : 'uploads/'});
 const comment   = require('./controllers/comment/commentController')
 const campaign  = require('./controllers/campaign&contest/campaignContestController')
 const template  = require('./controllers/templates/templateControllers')
+// const Razorpay  = require("razorpay");
 
 router.route('/signup').post(signup.userSignUp);
 router.route('/login').post(signup.login);
@@ -172,4 +173,33 @@ router.get("/getTrendingTemplates",  (req, res) => {
 router.post("/reportPost", (req, res) => {
     post.reportPost(req,res)
 });
+router.get("/getProfileById",  (req, res) => {
+    User.getProfileById(req,res)
+});
+//payment
+
+// router.post("/orders", async (req, res) => {
+//     try {
+//         console.log(req.body)
+//         const instance = new Razorpay({
+//             key_id: config.RAZORPAY_KEY_ID,
+//             key_secret: config.RAZORPAY_SECRET,
+//         });
+
+//         const options = {
+//             amount: 50000, // amount in smallest currency unit
+//             currency: "INR",
+//             receipt: "receipt_order_74394",
+//         };
+
+//         const order = await instance.orders.create(options);
+
+//         if (!order) return res.status(500).send("Some error occured");
+
+//         res.json(order);
+//     } catch (error) {
+//         res.status(500).send(error);
+//     }
+// });
+
 module.exports = router;

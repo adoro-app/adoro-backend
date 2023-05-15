@@ -212,6 +212,9 @@ exports.getProfileById = async (req, res) => {
       let sqlForPendingReq = `SELECT id FROM follower WHERE follower_user_id = ${userId} AND user_id = ${checkToken.id} AND status = 'pending'`
       let Fetchpendingreq= await common.customQuery(sqlForPendingReq);
      
+      let sqlForPendingReqSentByMe = `SELECT id FROM follower WHERE follower_user_id = ${checkToken.id} AND user_id = ${userId} AND status = 'pending'`
+      let FetchpendingreqsentByMe = await common.customQuery(sqlForPendingReqSentByMe);
+
       if(FetchFollowedUser.data.length > 0 && FetchFollowedHim.data.length > 0 && my_profile == false){
         getProfile.data[0]['tag'] = 'Following'
       }else if(FetchFollowedUser.data.length > 0 && FetchFollowedHim.data.length == 0 && my_profile == false){
@@ -224,6 +227,8 @@ exports.getProfileById = async (req, res) => {
         getProfile.data[0]['tag'] = 'Confirm'
       }else if(my_profile == true){
         getProfile.data[0]['tag'] = 'Edit Profile'
+      }else if(FetchpendingreqsentByMe.data.length > 0 && my_profile == false){
+        getProfile.data[0]['tag'] = 'Requested'
       }else{
         getProfile.data[0]['tag'] = ''
       }

@@ -132,16 +132,17 @@ exports.updateComment = async (req, res)=>{
             
             if(checkToken.id){
                 
-                let sql = `SELECT  users.username, users.full_name, users.image,comments.id as comment_id, comments.comment, comments.parent_id, comments.post_id, comments.created_on FROM comments LEFT JOIN users ON comments.user_id = users.id WHERE comments.post_id = ${post_id} AND comments.parent_id = 0;`
+                let sql = `SELECT  users.id as user_id, users.username, users.full_name, users.image,comments.id as comment_id, comments.comment, comments.parent_id, comments.post_id, comments.created_on FROM comments LEFT JOIN users ON comments.user_id = users.id WHERE comments.post_id = ${post_id} AND comments.parent_id = 0;`
                 // console.log(sql)
                 let getUserComments = await common.customQuery(sql);
+                
                 if (getUserComments.data.length > 0){
                     
                     for (let i = 0; i < getUserComments.data.length; i++){
-                        console.log(getUserComments.data[i].comment_id)
-                        let sqlForFetchChileComment = `SELECT  users.username, users.full_name, users.image,comments.id as comment_id, comments.comment, comments.parent_id, comments.post_id, comments.created_on FROM comments LEFT JOIN users ON comments.user_id = users.id WHERE comments.parent_id = ${getUserComments.data[i].comment_id};`
+                        console.log('========',getUserComments.data[i].comment_id)
+                        let sqlForFetchChileComment = `SELECT  users.id as user_id,users.username, users.full_name, users.image,comments.id as comment_id, comments.comment, comments.parent_id, comments.post_id, comments.created_on FROM comments LEFT JOIN users ON comments.user_id = users.id WHERE comments.parent_id = ${getUserComments.data[i].comment_id};`
                         let sqlForFetchChiledata = await common.customQuery(sqlForFetchChileComment);
-                        console.log(sqlForFetchChiledata)
+                        console.log('child===',sqlForFetchChiledata)
                         getUserComments.data[i]['reply_count'] = sqlForFetchChiledata.data.length;
                         getUserComments.data[i]['child_comment'] = sqlForFetchChiledata.data;
                     }

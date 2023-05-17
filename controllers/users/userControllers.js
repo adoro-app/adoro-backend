@@ -234,12 +234,15 @@ exports.getProfileById = async (req, res) => {
         getProfile.data[0]['tag'] = ''
       }
       // }
-     if(getProfile.data[0]['tag'] = 'following' && Fetchpendingreq.data.length > 0 ){
+    //   console.log(getProfile.data[0]['tag'] )
+    //   console.log(Fetchpendingreq.data.length)
+    let tag = getProfile.data[0]['tag']
+     if(tag = 'following' && Fetchpendingreq.data.length > 0 ){
       getProfile.data[0]['sub_tag'] = 'Confirm'
      }else{
       getProfile.data[0]['sub_tag'] = ''
      }
-      // console.log(getProfile)
+      console.log(getProfile)
       await res.send(getProfile);
     
     }else{

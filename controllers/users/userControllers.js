@@ -221,7 +221,7 @@ exports.getProfileById = async (req, res) => {
         getProfile.data[0]['tag'] = 'Following'
       }else if(FetchFollowedUser.data.length == 0 && FetchFollowedHim.data.length > 0 && my_profile == false){
         getProfile.data[0]['tag'] = 'Follow Back'
-      }else if(FetchFollowedUser.data.length == 0 && FetchFollowedHim.data.length == 0 && FetchpendingreqsentByMe.data.length == 0 && my_profile == false){
+      }else if(FetchFollowedUser.data.length == 0 && FetchFollowedHim.data.length == 0 && FetchpendingreqsentByMe.data.length == 0 && Fetchpendingreq.data.length == 0 && my_profile == false){
 
         getProfile.data[0]['tag'] = 'Follow'
       }else if(Fetchpendingreq.data.length > 0  && my_profile == false){

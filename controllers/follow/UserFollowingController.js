@@ -138,13 +138,13 @@ exports.sendFollowRequest = async (req, res)=>{
 
     exports.getFollowerList = async (req, res)=>{
         try{
-           
+           let user_id = req.query.user_id
             let checkToken = await common.checkToken(req.headers);
             
             if(checkToken.id){
                 
                 let sql = `SELECT users.id, users.username, users.full_name, users.image, follower.status FROM users LEFT JOIN follower ON 
-                users.id = follower.user_id   WHERE follower.follower_user_id = ${checkToken.id} AND follower.status = 'accepted'`
+                users.id = follower.user_id   WHERE follower.follower_user_id = ${user_id} AND follower.status = 'accepted'`
                 console.log(sql)
                 let getUser = await common.customQuery(sql);
 
@@ -174,13 +174,13 @@ exports.sendFollowRequest = async (req, res)=>{
 
     exports.getFollowingList = async (req, res)=>{
         try{
-           
+            let user_id = req.query.user_id
             let checkToken = await common.checkToken(req.headers);
             
             if(checkToken.id){
                 
                 let sql = `SELECT users.id, users.username, users.full_name, users.image, follower.status FROM follower LEFT JOIN users ON 
-                follower.user_id = users.id WHERE follower.follower_user_id = ${checkToken.id} AND follower.status = 'accepted'`
+                follower.user_id = users.id WHERE follower.follower_user_id = ${user_id} AND follower.status = 'accepted'`
                 let getUser = await common.customQuery(sql);
                 if (getUser.data.length > 0){
                     let response = {

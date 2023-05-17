@@ -63,7 +63,7 @@ exports.sendFollowRequest = async (req, res)=>{
                 let updateObj ={
                   status : 'accepted',
                 }
-                let addRecord = await common.UpdateRecords('follower', updateObj, id )
+                let addRecord = await common.UpdateRecords('follower', updateObj, `follower_user_id = ${id} AND user_id = ${checkToken.id}` )
                 if(addRecord ){
 
                     let response = {

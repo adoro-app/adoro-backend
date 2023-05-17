@@ -60,11 +60,16 @@ exports.sendFollowRequest = async (req, res)=>{
             let currentDate = moment(datenow).format('YYYY-MM-DD HH:mm:ss');
             // console.log(checkToken)
             if(checkToken.id){
-                let updateObj ={
-                  status : 'accepted',
-                }
-                let addRecord = await common.UpdateRecords('follower', updateObj, `follower_user_id = ${id} AND user_id = ${checkToken.id}` )
-                if(addRecord ){
+                // let updateObj ={
+                //   status : 'accepted',
+                // }
+                console.log(id)
+                console.log(checkToken.id)
+                let sql = `UPDATE follower SET status = 'accepted' WHERE follower_user_id = ${id} AND user_id = ${checkToken.id} ` 
+                // let addRecord = await common.acceptFollowReq('follower', 'status = accepted', `follower_user_id = ${id} AND user_id = ${checkToken.id}` )
+                let updateRec = await common.customQuery(sql);
+                console.log(updateRec)
+                if(updateRec ){
 
                     let response = {
                         status : 200,

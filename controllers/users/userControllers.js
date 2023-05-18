@@ -32,7 +32,7 @@ exports.getUserDetails = async (req, res) => {
       let getFollower = await common.customQuery(sql);
       response['follower'] = getFollower.data;
       let sqlForFollowing = `SELECT users.id, users.username, users.full_name, users.image, follower.status FROM follower LEFT JOIN users ON 
-      follower.user_id = user_id.id WHERE follower.follower_user_id = ${userId} AND follower.status = 'accepted'`
+      follower.user_id = users.id WHERE follower.follower_user_id = ${userId} AND follower.status = 'accepted'`
       let getFollowingList = await common.customQuery(sqlForFollowing);
       response['following'] = getFollowingList.data;
       await res.send(response);

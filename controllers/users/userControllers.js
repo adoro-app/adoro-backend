@@ -28,11 +28,11 @@ exports.getUserDetails = async (req, res) => {
       let getPost = await common.GetRecords('post', '*', `user_id = ${userId}`)
       response['post'] = getPost.data;
       let sql = `SELECT users.id, users.username, users.full_name, users.image, follower.status FROM follower LEFT JOIN users ON 
-      follower.user_id = users.id WHERE follower.user_id = ${userId} AND follower.status = 'accepted'`
+      follower.follower_user_id = users.id WHERE follower.user_id = ${userId} AND follower.status = 'accepted'`
       let getFollower = await common.customQuery(sql);
       response['follower'] = getFollower.data;
       let sqlForFollowing = `SELECT users.id, users.username, users.full_name, users.image, follower.status FROM follower LEFT JOIN users ON 
-      follower.user_id = users.id WHERE follower.follower_user_id = ${userId} AND follower.status = 'accepted'`
+      follower.user_id = user_id.id WHERE follower.follower_user_id = ${userId} AND follower.status = 'accepted'`
       let getFollowingList = await common.customQuery(sqlForFollowing);
       response['following'] = getFollowingList.data;
       await res.send(response);
@@ -170,15 +170,31 @@ exports.getProfileById = async (req, res) => {
     let getuserdetails = await common.GetRecords(config.userTable, '*', `id = ${userId}`)
     if(getuserdetails.data.length > 0){
       
-      let sql = `SELECT u.id, u.username, u.full_name, u.image, u.cover_photo, 
-      COUNT(DISTINCT f.follower_user_id) AS followers_count, 
-      COUNT(DISTINCT f.user_id) AS following_count, 
+      let sql = `SELECT
+      u.id,
+      u.username,
+      u.full_name,
+      u.image,
+      u.cover_photo,
+      (
+          SELECT COUNT(*)
+          FROM follower f
+          WHERE f.follower_user_id = u.id AND f.status = 'accepted'
+      ) AS followers_count,
+      (
+          SELECT COUNT(*)
+          FROM follower fo
+          WHERE fo.user_id = u.id AND fo.status = 'accepted'
+      ) AS following_count,
       COUNT(DISTINCT p.id) AS posts_count
-      FROM users u 
-      LEFT JOIN follower f ON f.follower_user_id = u.id AND f.status = 'accepted'
-      LEFT JOIN post p ON p.user_id = u.id 
-      WHERE u.id = ${userId} 
-      GROUP BY u.id
+  FROM
+      users u 
+  LEFT JOIN
+      post p ON p.user_id = u.id 
+  WHERE
+      u.id = ${userId}
+  GROUP BY
+      u.id
       LIMIT 1`
                 
       let getProfile = await common.customQuery(sql);

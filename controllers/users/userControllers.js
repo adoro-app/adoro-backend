@@ -179,12 +179,12 @@ exports.getProfileById = async (req, res) => {
       (
           SELECT COUNT(*)
           FROM follower f
-          WHERE f.follower_user_id = u.id AND f.status = 'accepted'
+          WHERE f.user_id = u.id AND f.status = 'accepted'
       ) AS followers_count,
       (
           SELECT COUNT(*)
           FROM follower fo
-          WHERE fo.user_id = u.id AND fo.status = 'accepted'
+          WHERE fo.follower_user_id = u.id AND fo.status = 'accepted'
       ) AS following_count,
       COUNT(DISTINCT p.id) AS posts_count
   FROM

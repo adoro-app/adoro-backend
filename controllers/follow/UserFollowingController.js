@@ -108,8 +108,10 @@ exports.sendFollowRequest = async (req, res)=>{
                 let deleteRecord;
                 if (flag == 'feed'){
                      deleteRecord = await common.deleteRecords('follower', `user_id = ${id} AND follower_user_id = ${checkToken.id}` )
-                }else{
+                }if(flag == 'delete'){
                      deleteRecord = await common.deleteRecords('follower', `user_id = ${checkToken.id} AND follower_user_id = ${id}` )
+                }else{
+                    deleteRecord = await common.deleteRecords('follower', `user_id = ${id} AND follower_user_id = ${checkToken.id}` )
                 }
                 
                 if(deleteRecord ){

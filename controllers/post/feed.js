@@ -45,8 +45,8 @@ exports.feed = async (req,res) =>
             LEFT JOIN follower ON follower.user_id = post.user_id AND follower.status = 'accepted'
             LEFT JOIN users ON post.user_id = users.id
             LEFT JOIN likes l ON post.id = l.post_id
-            LEFT JOIN user_report_post ON post.id = user_report_post.post_id AND user_report_post.user_id = ${checkToken.id}
-            WHERE user_report_post.id IS NULL AND l.id IS NOT NULL AND follower.follower_user_id = ${checkToken.id} 
+            LEFT JOIN user_report_post urp ON post.id = urp.post_id AND urp.user_id = ${checkToken.id}
+            WHERE urp.id IS NULL AND l.id IS NOT NULL AND follower.follower_user_id = ${checkToken.id} 
             GROUP BY post.id
             ORDER BY post.created_on DESC
             LIMIT 10

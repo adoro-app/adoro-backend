@@ -301,7 +301,7 @@ exports.getPostById = async (req, res) => {
       users.full_name,
       users.image,
       COALESCE(l.likes_count, 0) AS noOfLikes,
-      COALESCE(c.comments_count, 0) AS noOfComments
+      COALESCE(c.comments_count, 0) AS comments
     FROM
       post p
     LEFT JOIN

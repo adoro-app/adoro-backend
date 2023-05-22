@@ -4,7 +4,8 @@ const axios = require('axios');
 const jwt = require('jsonwebtoken');
 const response = require('../../constant/response');
 const fs = require('fs');
-const moment = require('moment');
+// const moment = require('moment');
+const moment = require('moment-timezone');
 
 const multer = require('multer');
 path = require('path');
@@ -17,7 +18,7 @@ exports.sendFollowRequest = async (req, res)=>{
             let user_id = req.body.user_id;
             let checkToken = await common.checkToken(req.headers);
             let datenow = new Date()
-            let currentDate = moment(datenow).format('YYYY-MM-DD HH:mm:ss');
+            const currentDate = moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
             console.log(checkToken)
             if(checkToken.id){
                 let addobj ={

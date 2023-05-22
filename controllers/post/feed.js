@@ -4,7 +4,8 @@ const axios = require('axios');
 const jwt = require('jsonwebtoken');
 const response = require('../../constant/response');
 const fs = require('fs');
-const moment = require('moment');
+// const moment = require('moment');
+const moment = require('moment-timezone');
 const AWS = require('aws-sdk'); 
 const multer = require('multer');
 path = require('path');
@@ -46,7 +47,7 @@ exports.feed = async (req,res) =>
             LEFT JOIN users ON post.user_id = users.id
             LEFT JOIN likes l ON post.id = l.post_id
             LEFT JOIN user_report_post urp ON post.id = urp.post_id AND urp.user_id = ${checkToken.id}
-            WHERE urp.id IS NULL AND l.id IS NOT NULL AND follower.follower_user_id = ${checkToken.id} 
+            WHERE urp.id IS NULL AND follower.follower_user_id = ${checkToken.id}
             GROUP BY post.id
             ORDER BY post.created_on DESC
             LIMIT 10
@@ -172,7 +173,7 @@ exports.like = async (req, res)=>{
                     let addobj ={
                         user_id:checkToken.id,
                         post_id:post_id,
-                        created_on:currentDate
+                        created_on: moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss')
     
                     }
                     let addRecord = await common.AddRecords('likes', addobj )
@@ -212,7 +213,7 @@ exports.like = async (req, res)=>{
            
             let checkToken = await common.checkToken(req.headers);
             let datenow = new Date()
-            let currentDate = moment(datenow).format('YYYY-MM-DD HH:mm:ss');
+            let currentDate = moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss')
             console.log(req.file)
             
             if(checkToken.id){
@@ -411,7 +412,7 @@ exports.like = async (req, res)=>{
             let checkToken = await common.checkToken(req.headers);
             console.log(checkToken)
             let datenow = new Date()
-            let currentDate = moment(datenow).format('YYYY-MM-DD HH:mm:ss');
+            let currentDate = moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss')
             let getUser = await common.GetRecords('user_report_post','id', `post_id = ${postId} AND user_id = ${checkToken.id}`);
               
             if(checkToken.id ){

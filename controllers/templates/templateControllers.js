@@ -4,7 +4,8 @@ const axios = require('axios');
 const jwt = require('jsonwebtoken');
 const response = require('../../constant/response');
 const fs = require('fs');
-const moment = require('moment');
+// const moment = require('moment');
+const moment = require('moment-timezone');
 const AWS = require('aws-sdk');
 const multer = require('multer');
 path = require('path');
@@ -21,7 +22,7 @@ exports.uploadTemplate = async (req, res) => {
         console.log(tag)
         let checkToken = await common.checkToken(req.headers);
         let datenow = new Date()
-        let currentDate = moment(datenow).format('YYYY-MM-DD HH:mm:ss');
+        let currentDate = moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
 
         if (checkToken.id) {
             console.log(req.file)

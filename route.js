@@ -12,7 +12,7 @@ const webAPI    = require('./controllers/wep-API/webApiControllers')
 const multer    = require('multer');
 const upload    = multer({dest : 'uploads/'});
 const comment   = require('./controllers/comment/commentController')
-const campaign  = require('./controllers/campaign&contest/campaignContestController')
+const campaign  = require('./controllers/campaignAndcontest/campaignContestController')
 const template  = require('./controllers/templates/templateControllers')
 // const Razorpay  = require("razorpay");
 
@@ -178,6 +178,9 @@ router.get("/getProfileById",  (req, res) => {
 });
 router.get("/getPostById",  (req, res) => {
     User.getPostById(req,res)
+});
+router.post("/postLikesInComments",  (req, res) => {
+    comment.postLikesInComments(req,res)
 });
 //payment
 

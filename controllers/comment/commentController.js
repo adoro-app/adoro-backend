@@ -4,10 +4,11 @@ const axios = require('axios');
 const jwt = require('jsonwebtoken');
 const response = require('../../constant/response');
 const fs = require('fs');
-const moment = require('moment');
+// const moment = require('moment');
 
 const multer = require('multer');
 path = require('path');
+const moment = require('moment-timezone');
 
 
 
@@ -20,7 +21,7 @@ exports.postComment = async (req, res)=>{
 
             let checkToken = await common.checkToken(req.headers);
             let datenow = new Date()
-            let currentDate = moment(datenow).format('YYYY-MM-DD HH:mm:ss');
+            const currentDate = moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
             console.log(checkToken)
             if(checkToken.id){
                 let addobj ={
@@ -166,6 +167,51 @@ exports.updateComment = async (req, res)=>{
                 
         }catch(err){
             console.log(err)
+            throw err;
+        }
+         
+    }
+
+
+    exports.postLikesInComments = async (req, res)=>{
+        try{
+          
+            let post_id = req.body.post_id;
+            let comment_id = req.body.comment_id;
+
+            let checkToken = await common.checkToken(req.headers);
+            
+            const currentDate = moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
+
+            if(checkToken.id){
+                let addobj ={
+                    comment_id:comment_id,
+                    post_id: post_id,
+                    user_id:checkToken.id,
+                    created_on:currentDate
+
+                }
+                let addRecord = await common.AddRecords('comments_likes', addobj )
+                if(addRecord ){
+
+                    let response = {
+                        status : 200,
+                        msg : 'Successfull'
+                    }
+                    
+                    res.send(response)
+                }else{
+                    let response = {
+                        status : 500,
+                        msg : 'Something went wrong'
+                    }
+                    res.send(response)
+                }
+            }else{
+                res.send(response.UnauthorizedUser(checkToken))
+            }
+          
+        }catch(err){
             throw err;
         }
          

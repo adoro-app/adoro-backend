@@ -131,11 +131,41 @@ module.exports =
                     try {
                         dbConnection.query(sql, [updateObject, id], async (err, result) => {
                             if (err) {
-
+                                console.log(err)
                                 reject(responseCode.dbErrorResponse(err));
                             }
                             else (!_.isEmpty(result))
                             {
+                                console.log(result)
+                                responseObj = await responseCode.recordUpdatedSuccessResponse(result);
+                            }
+                            resolve(responseObj);
+                        })
+                    } catch (error) {
+                        return await error;
+                    }
+                });
+            } catch (error) {
+                return await error;
+            }
+        },
+        acceptFollowReq: async (table, updateObject, where) => {
+
+            try {
+
+                return new Promise(async (resolve, reject) => {
+                    let responseObj = {};
+                    let sql = `UPDATE ${table} SET ? WHERE ?`;
+                    try {
+                        
+                        dbConnection.query(sql, [updateObject, where], async (err, result) => {
+                            if (err) {
+                                console.log(err)
+                                reject(responseCode.dbErrorResponse(err));
+                            }
+                            else (!_.isEmpty(result))
+                            {
+                                // console.log(result)
                                 responseObj = await responseCode.recordUpdatedSuccessResponse(result);
                             }
                             resolve(responseObj);

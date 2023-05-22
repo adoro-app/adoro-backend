@@ -2,7 +2,8 @@ const common  = require('../../common/common');
 const config = require('../../config/config');
 const axios = require('axios');
 const jwt = require('jsonwebtoken');
-const moment = require('moment');
+// const moment = require('moment');
+const moment = require('moment-timezone');
 const AWS = require('aws-sdk'); 
 const fs = require('fs');
 const nodemailer = require("nodemailer");
@@ -66,7 +67,7 @@ exports.agencySignUp = async (req,res) =>
                 IsLogo : IsLogo,
                 IsStock_image : IsStock_image,
                 brand_guidlines : brand_guidlines,
-                created_on : moment(datenow).format('YYYY-MM-DD HH:mm:ss')
+                created_on : moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss')
 
           }
           let addRecords = await common.AddRecords('agency', insertObj );
@@ -99,7 +100,7 @@ exports.agencySignUp = async (req,res) =>
               logo : data.Location,
               time_limit : time_limit,
               status : 'pending',
-              created_on : moment(datenow).format('YYYY-MM-DD HH:mm:ss')
+              created_on : moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
             }
             let addCamp = await common.AddRecords('campaign', addcampaign );
             if(addCamp.data.affectedRows == 1){
@@ -297,7 +298,7 @@ exports.contact_us = async (req,res) =>
       email: reqBody.email,
       mobileNo: reqBody.mobileNo,
       message: reqBody.message,
-      created_on : moment(datenow).format('YYYY-MM-DD HH:mm:ss')
+      created_on : moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
     }
    
     let addRecord = await common.AddRecords('web_contact_us', addObj ) 
@@ -394,7 +395,7 @@ exports.createCampaign = async (req,res) =>
         gif:reqBody.gif,
         // no_of_meme_needed : reqBody.no_of_meme_needed,
         status : 'pending',
-        created_on : moment(datenow).format('YYYY-MM-DD HH:mm:ss')
+        created_on : moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
       }
      console.log(addObj)
       let addRecord = await common.AddRecords('campaign', addObj ) 

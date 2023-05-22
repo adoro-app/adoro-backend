@@ -2,7 +2,8 @@
 const common = require('../../common/common');
 const config = require('../../config/config');
 const fs = require('fs');
-const moment = require('moment');
+// const moment = require('moment');
+const moment = require('moment-timezone');
 const AWS = require('aws-sdk'); 
 // const multer = require('multer');
 const path = require('path');
@@ -93,7 +94,7 @@ exports.upload_profile_pic = async (req, res) => {
            
     let checkToken = await common.checkToken(req.headers);
     let datenow = new Date()
-    let currentDate = moment(datenow).format('YYYY-MM-DD HH:mm:ss');
+    let currentDate = moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
    
     if(checkToken.id){
       console.log(req.file.fieldname)

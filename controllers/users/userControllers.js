@@ -326,9 +326,14 @@ exports.getPostById = async (req, res) => {
      
       let fetchpostdetails = await common.customQuery(sql);
       let PrepData = await preparedata(fetchpostdetails.data[0])
-        
+      let response = {
+        status : 200,
+        msg : 'post found.',
+        data : PrepData
+       
+      }
       
-      await res.send(PrepData);
+      await res.send(response);
     
     }else{
       let response = {
@@ -348,7 +353,7 @@ async function preparedata(getdata){
     let sqlForFetchLikes = `SELECT post.id, users.id, users.username, users.full_name, users.image FROM post LEFT JOIN likes ON post.id = likes.post_id LEFT JOIN users on likes.user_id = users.id WHERE post.id = ${getdata.id}`;
     // console.log(sqlForFetchLikes)
     let FetchLikes = await common.customQuery(sqlForFetchLikes);
-    console.log(FetchLikes.data.length)
+    
     if(FetchLikes.data.length > 0){
       getdata['likedByPeople'] =  FetchLikes.data
     }else{

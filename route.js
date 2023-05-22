@@ -176,6 +176,9 @@ router.post("/reportPost", (req, res) => {
 router.get("/getProfileById",  (req, res) => {
     User.getProfileById(req,res)
 });
+router.get("/getPostById",  (req, res) => {
+    User.getPostById(req,res)
+});
 //payment
 
 // router.post("/orders", async (req, res) => {

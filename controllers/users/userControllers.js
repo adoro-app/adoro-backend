@@ -8,6 +8,7 @@ const AWS = require('aws-sdk');
 const path = require('path');
 // const { get } = require('underscore');
 const response = require('../../constant/response');
+const { reject } = require('underscore');
 
 const s3 = new AWS.S3({
     accessKeyId: config.AWS_CREDENTIAL.accessKeyId,
@@ -322,10 +323,12 @@ exports.getPostById = async (req, res) => {
     
       
       `
+     
       let fetchpostdetails = await common.customQuery(sql);
-             
+      let PrepData = await preparedata(fetchpostdetails)
+        
       
-      await res.send(fetchpostdetails.data);
+      await res.send(PrepData);
     
     }else{
       let response = {
@@ -339,4 +342,24 @@ exports.getPostById = async (req, res) => {
   }catch(err){
     await res.send(err);
   }
+}
+async function preparedata(getdata){
+  try{
+    let sqlForFetchLikes = `SELECT post.id, users.id, users.username, users.full_name, users.image FROM post LEFT JOIN likes ON post.id = likes.post_id LEFT JOIN users on likes.user_id = users.id WHERE post.id = ${getdata.data[0].id}`;
+    // console.log(sqlForFetchLikes)
+    let FetchLikes = await common.customQuery(sqlForFetchLikes);
+    console.log(FetchLikes.data.length)
+    if(FetchLikes.data.length > 0){
+      getdata['likes'] =  FetchLikes.data
+    }else{
+      getdata['likes'] =  []
+    }
+    console.log(JSON.stringify(getdata))
+    return getdata;
+  }catch(err){
+throw err;
+  }
+
+      
+ 
 }

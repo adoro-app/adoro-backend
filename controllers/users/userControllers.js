@@ -274,3 +274,69 @@ exports.getProfileById = async (req, res) => {
     await res.send(err);
   }
 }
+
+exports.getPostById = async (req, res) => {
+  // console.log(req.query)
+  try{
+    // let checkToken = await common.checkToken(req.headers);
+    let post_id, my_profile = false;
+    // my_profile = (checkToken.id == req.query.userId) ? true : false;
+    post_id = (req.query.post_id) ? req.query.post_id : '';
+    let tag = ''
+    
+    
+    let getPostDetails = await common.GetRecords('post', '*', `id = ${post_id}`)
+    if(getPostDetails.data.length > 0){
+      
+      let sql = `SELECT
+      p.id,
+      p.user_id,
+      p.content,
+      p.content_type,
+      p.content_url,
+      p.tag,
+      p.created_on,
+      users.username,
+      users.full_name,
+      users.image,
+      COALESCE(l.likes_count, 0) AS noOfLikes,
+      COALESCE(c.comments_count, 0) AS noOfComments
+    FROM
+      post p
+    LEFT JOIN
+      users ON p.user_id = users.id
+    LEFT JOIN
+      (
+        SELECT post_id, COUNT(*) AS likes_count
+        FROM likes
+        GROUP BY post_id
+      ) l ON p.id = l.post_id
+    LEFT JOIN
+      (
+        SELECT post_id, COUNT(*) AS comments_count
+        FROM comments
+        GROUP BY post_id
+      ) c ON p.id = c.post_id
+    WHERE
+      p.id = ${post_id};
+    
+      
+      `
+      let fetchpostdetails = await common.customQuery(sql);
+             
+      
+      await res.send(fetchpostdetails.data);
+    
+    }else{
+      let response = {
+        status : 500,
+        msg : 'No post found.',
+       
+      }
+      await res.send(response);
+    }
+
+  }catch(err){
+    await res.send(err);
+  }
+}

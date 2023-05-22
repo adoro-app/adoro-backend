@@ -325,7 +325,7 @@ exports.getPostById = async (req, res) => {
       `
      
       let fetchpostdetails = await common.customQuery(sql);
-      let PrepData = await preparedata(fetchpostdetails)
+      let PrepData = await preparedata(fetchpostdetails.data[0])
         
       
       await res.send(PrepData);
@@ -345,14 +345,14 @@ exports.getPostById = async (req, res) => {
 }
 async function preparedata(getdata){
   try{
-    let sqlForFetchLikes = `SELECT post.id, users.id, users.username, users.full_name, users.image FROM post LEFT JOIN likes ON post.id = likes.post_id LEFT JOIN users on likes.user_id = users.id WHERE post.id = ${getdata.data[0].id}`;
+    let sqlForFetchLikes = `SELECT post.id, users.id, users.username, users.full_name, users.image FROM post LEFT JOIN likes ON post.id = likes.post_id LEFT JOIN users on likes.user_id = users.id WHERE post.id = ${getdata.id}`;
     // console.log(sqlForFetchLikes)
     let FetchLikes = await common.customQuery(sqlForFetchLikes);
     console.log(FetchLikes.data.length)
     if(FetchLikes.data.length > 0){
-      getdata['likes'] =  FetchLikes.data
+      getdata['likedByPeople'] =  FetchLikes.data
     }else{
-      getdata['likes'] =  []
+      getdata['likedByPeople'] =  []
     }
     console.log(JSON.stringify(getdata))
     return getdata;

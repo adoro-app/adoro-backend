@@ -182,6 +182,9 @@ router.get("/getPostById",  (req, res) => {
 router.post("/postLikesInComments",  (req, res) => {
     comment.postLikesInComments(req,res)
 });
+router.post("/deleteLikesInComments",  (req, res) => {
+    comment.deleteLikesInComments(req,res)
+});
 //payment
 
 // router.post("/orders", async (req, res) => {

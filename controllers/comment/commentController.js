@@ -133,15 +133,84 @@ exports.updateComment = async (req, res)=>{
             
             if(checkToken.id){
                 
-                let sql = `SELECT  users.id as user_id, users.username, users.full_name, users.image,comments.id as comment_id, comments.comment, comments.parent_id, comments.post_id, comments.created_on FROM comments LEFT JOIN users ON comments.user_id = users.id WHERE comments.post_id = ${post_id} AND comments.parent_id = 0;`
+                // let sql = `SELECT  users.id as user_id, users.username, users.full_name, users.image,comments.id as comment_id, 
+                // comments.comment, comments.parent_id, comments.post_id, comments.created_on , COUNT(comment_likes.id) AS likes_count
+                // FROM comments LEFT JOIN users ON comments.user_id = users.id 
+                // LEFT JOIN
+                // comments_likes ON comments.id = comments_likes.comment_id
+                // WHERE comments.post_id = ${post_id} AND comments.parent_id = 0`
                 // console.log(sql)
+                let sql = `SELECT
+                users.id AS user_id,
+                users.username,
+                users.full_name,
+                users.image,
+                comments.id AS comment_id,
+                comments.comment,
+                comments.parent_id,
+                comments.post_id,
+                comments.created_on,
+                COUNT(comments_likes.id) AS likes_count
+            FROM
+                comments
+            LEFT JOIN
+                users ON comments.user_id = users.id
+            LEFT JOIN
+                comments_likes ON comments.id = comments_likes.comment_id
+            WHERE
+                comments.post_id = ${post_id}
+                AND comments.parent_id = 0
+            GROUP BY
+                users.id,
+                users.username,
+                users.full_name,
+                users.image,
+                comments.id,
+                comments.comment,
+                comments.parent_id,
+                comments.post_id,
+                comments.created_on;
+            `
                 let getUserComments = await common.customQuery(sql);
                 
                 if (getUserComments.data.length > 0){
                     
                     for (let i = 0; i < getUserComments.data.length; i++){
                         console.log('========',getUserComments.data[i].comment_id)
-                        let sqlForFetchChileComment = `SELECT  users.id as user_id,users.username, users.full_name, users.image,comments.id as comment_id, comments.comment, comments.parent_id, comments.post_id, comments.created_on FROM comments LEFT JOIN users ON comments.user_id = users.id WHERE comments.parent_id = ${getUserComments.data[i].comment_id};`
+                        // let sqlForFetchChileComment = `SELECT  users.id as user_id,users.username, users.full_name, users.image,comments.id as comment_id, 
+                        // comments.comment, comments.parent_id, comments.post_id, comments.created_on 
+                        // FROM comments LEFT JOIN users ON comments.user_id = users.id 
+                        // WHERE comments.parent_id = ${getUserComments.data[i].comment_id};`
+                        let sqlForFetchChileComment = `SELECT
+                        users.id AS user_id,
+                        users.username,
+                        users.full_name,
+                        users.image,
+                        comments.id AS comment_id,
+                        comments.comment,
+                        comments.parent_id,
+                        comments.post_id,
+                        comments.created_on,
+                        COUNT(comments_likes.id) AS likes_count
+                    FROM
+                        comments
+                    LEFT JOIN
+                        users ON comments.user_id = users.id
+                    LEFT JOIN
+                        comments_likes ON comments.id = comments_likes.comment_id
+                    WHERE
+                        comments.parent_id = ${getUserComments.data[i].comment_id}
+                    GROUP BY
+                        users.id,
+                        users.username,
+                        users.full_name,
+                        users.image,
+                        comments.id,
+                        comments.comment,
+                        comments.parent_id,
+                        comments.post_id,
+                        comments.created_on;
+                    `
                         let sqlForFetchChiledata = await common.customQuery(sqlForFetchChileComment);
                         console.log('child===',sqlForFetchChiledata)
                         getUserComments.data[i]['reply_count'] = sqlForFetchChiledata.data.length;

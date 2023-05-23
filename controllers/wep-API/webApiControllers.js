@@ -100,7 +100,7 @@ exports.agencySignUp = async (req,res) =>
               logo : data.Location,
               time_limit : time_limit,
               status : 'pending',
-              created_on : moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
+              created_on : moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss')
             }
             let addCamp = await common.AddRecords('campaign', addcampaign );
             if(addCamp.data.affectedRows == 1){
@@ -298,7 +298,7 @@ exports.contact_us = async (req,res) =>
       email: reqBody.email,
       mobileNo: reqBody.mobileNo,
       message: reqBody.message,
-      created_on : moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
+      created_on : moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss')
     }
    
     let addRecord = await common.AddRecords('web_contact_us', addObj ) 
@@ -395,7 +395,7 @@ exports.createCampaign = async (req,res) =>
         gif:reqBody.gif,
         // no_of_meme_needed : reqBody.no_of_meme_needed,
         status : 'pending',
-        created_on : moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
+        created_on : moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss')
       }
      console.log(addObj)
       let addRecord = await common.AddRecords('campaign', addObj ) 

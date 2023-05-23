@@ -3,6 +3,7 @@ const config = require('../../config/config');
 const axios = require('axios');
 const jwt = require('jsonwebtoken');
 const response = require('../../constant/response');
+
 exports.userSignUp = async (req,res) =>
 {
   try{
@@ -10,6 +11,7 @@ exports.userSignUp = async (req,res) =>
       let username = (req.body.username) ? req.body.username : ""
       let email = (req.body.email) ? req.body.email : ""
       let full_name = (req.body.full_name) ? req.body.full_name : ""
+      let device_token = (req.body.device_token) ? req.body.device_token : ""
       
       if (mobileNo != "" && mobileNo.length == 10 ){ 
         let GetRecords = await common.GetRecords(config.userTable, 'id', `mobileNo =${mobileNo}` )
@@ -26,7 +28,8 @@ exports.userSignUp = async (req,res) =>
             username : username,
             full_name: full_name,
             email : email,
-            otp : generateOtp
+            otp : generateOtp,
+            device_token: device_token
           }
           let addRecords = await common.AddRecords(config.userTable, insertObj )
           let message = `Hey Creator, Your OTP for signup is ${generateOtp}. Share our app with everyone, not this OTP. Visit adoro.social THINK ELLPSE`
@@ -55,6 +58,7 @@ exports.login = async (req,res) =>
 {
   try{
       let mobileNo = (req.body.mobileNo) ? req.body.mobileNo : "";
+      let device_token = (req.body.device_token) ? req.body.device_token : ""
       if (mobileNo != "" && mobileNo.length == 10){ 
         let generateOtp = Math.floor(100000 + Math.random() * 900000)
         
@@ -65,7 +69,9 @@ exports.login = async (req,res) =>
           let message = `Hey Creator, Your OTP for signup is ${generateOtp}. Share our app with everyone, not this OTP. Visit adoro.social THINK ELLPSE`
           let url = `https://sms.prowtext.com/sendsms/sendsms.php?apikey=${config.api_key}&type=TEXT&mobile=${mobileNo}&sender=ELLPSE&PEID=${config.PEID}&TemplateId=${config.templateID}&message=${message}`
           let sendMsg = await axios.get(url)
-          let updateObj = {"otp" : generateOtp}
+          let updateObj = {"otp" : generateOtp, "device_token" : device_token
+        
+        }
           let addOTP = await common.UpdateRecords(config.userTable, updateObj, GetRecords.data[0].id  )
           console.log(addOTP)
           let response = {

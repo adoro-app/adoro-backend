@@ -177,6 +177,7 @@ exports.getProfileById = async (req, res) => {
       u.username,
       u.full_name,
       u.image,
+      u.device_token,
       u.cover_photo,
       (
           SELECT COUNT(*)

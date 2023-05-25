@@ -225,13 +225,14 @@ exports.like = async (req, res)=>{
                                 let addRecord = await common.AddRecords('notification_history', addobject )
                                
                         
-                            let response = {
-                                status : 200,
-                                msg : 'Successfull'
-                            }
                             
-                            res.send(response)
                         }
+                        let response = {
+                            status : 200,
+                            msg : 'Successfull'
+                        }
+                        
+                        res.send(response)
                     }
                 
                 } else{

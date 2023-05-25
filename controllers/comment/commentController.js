@@ -34,6 +34,43 @@ exports.postComment = async (req, res)=>{
                 }
                 let addRecord = await common.AddRecords('comments', addobj )
                 if(addRecord ){
+                    let sqlForGetUserDeviceToken = `SELECT u.device_token, u.id
+                    FROM post AS p
+                    JOIN users AS u ON p.user_id = u.id
+                    WHERE p.id = ${postId}
+                    
+                    `
+                   
+                    let executeQ = await common.customQuery(sqlForGetUserDeviceToken)
+                    let uid = executeQ.data[0].id
+                    let device_token = (executeQ.data[0].device_token) ? (executeQ.data[0].device_token) : '';
+                    let sqlForGetUserName = `SELECT u.username, u.full_name FROM users u WHERE 
+                    id = ${checkToken.id}
+                    `
+                    let executeQu = await common.customQuery(sqlForGetUserName)
+                    let senderUsername = executeQu.data[0].username;
+                    if(device_token != ''){
+                        const message = {
+                            notification: {
+                              title: 'Comment',
+                              body: `${senderUsername} commented on your post.`,
+                            },
+                            token: `${device_token}`,
+                          };
+                        
+                        let sendNotification = await common.sendNotification(message);
+                        
+                        
+                            let addobject ={
+                                title:message.notification.title,
+                                message:message.notification.body,
+                                user_id : uid,
+                                
+                                created_on: moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss')
+            
+                            }
+                            let addRecord = await common.AddRecords('notification_history', addobject )
+                        }
 
                     let response = {
                         status : 200,
@@ -265,7 +302,47 @@ exports.updateComment = async (req, res)=>{
                 }
                 let addRecord = await common.AddRecords('comments_likes', addobj )
                 if(addRecord ){
-
+                    let sqlForGetUserDeviceToken = `SELECT u.device_token, u.id
+                    FROM comments_likes cl
+                    JOIN comments c ON cl.comment_id = c.id
+                    JOIN users u ON c.user_id = u.id
+                    WHERE cl.comment_id = ${comment_id}
+                    `
+                   
+                    let executeQ = await common.customQuery(sqlForGetUserDeviceToken)
+                    let uid = executeQ.data[0].id
+                    let device_token = (executeQ.data[0].device_token) ? (executeQ.data[0].device_token) : '';
+                    let sqlForGetUserName = `SELECT u.username, u.full_name FROM users u WHERE 
+                    id = ${checkToken.id}
+                    `
+                    let executeQu = await common.customQuery(sqlForGetUserName)
+                    let senderUsername = executeQu.data[0].username;
+                    if(device_token != ''){
+                        const message = {
+                            notification: {
+                              title: 'Like',
+                              body: `${senderUsername} liked your comment.`,
+                            },
+                            token: `${device_token}`,
+                          };
+                        
+                        let sendNotification = await common.sendNotification(message);
+                        
+                        
+                            let addobject ={
+                                title:message.notification.title,
+                                message:message.notification.body,
+                                user_id : uid,
+                                
+                                created_on: moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss')
+            
+                            }
+                            let addRecord = await common.AddRecords('notification_history', addobject )
+                           
+                    
+                        
+                    }
+                    
                     let response = {
                         status : 200,
                         msg : 'Successfull'

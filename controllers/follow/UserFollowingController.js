@@ -31,6 +31,44 @@ exports.sendFollowRequest = async (req, res)=>{
                 let addRecord = await common.AddRecords('follower', addobj )
                 if(addRecord ){
 
+                    let sqlForGetUserDeviceToken = `SELECT u.device_token, u.id
+                        FROM users u
+                        WHERE u.id = ${user_id}
+                        `
+                       
+                        let executeQ = await common.customQuery(sqlForGetUserDeviceToken)
+                        let uid = executeQ.data[0].id
+                        let device_token = (executeQ.data[0].device_token) ? (executeQ.data[0].device_token) : '';
+                        let sqlForGetUserName = `SELECT u.username, u.full_name FROM users u WHERE 
+                        id = ${checkToken.id}
+                        `
+                        let executeQu = await common.customQuery(sqlForGetUserName)
+                        let senderUsername = executeQu.data[0].username;
+                        if(device_token != ''){
+                            const message = {
+                                notification: {
+                                  title: 'Follow Request',
+                                  body: `${senderUsername} Sent you a follow request`,
+                                },
+                                token: `${device_token}`,
+                              };
+                            
+                            let sendNotification = await common.sendNotification(message);
+                            
+                            
+                                let addobject ={
+                                    title:message.notification.title,
+                                    message:message.notification.body,
+                                    user_id : uid,
+                                    
+                                    created_on: moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss')
+                
+                                }
+                                let addRecord = await common.AddRecords('notification_history', addobject )
+                               
+                        
+                            
+                        }
                     let response = {
                         status : 200,
                         msg : 'Successfull'
@@ -71,7 +109,45 @@ exports.sendFollowRequest = async (req, res)=>{
                 let updateRec = await common.customQuery(sql);
                 console.log(updateRec)
                 if(updateRec ){
-
+                    let sqlForGetUserDeviceToken = `SELECT u.device_token, u.id
+                    FROM likes l
+                    JOIN users u ON l.user_id = u.id
+                    WHERE l.post_id = ${id}
+                    `
+                   
+                    let executeQ = await common.customQuery(sqlForGetUserDeviceToken)
+                    let uid = executeQ.data[0].id
+                    let device_token = (executeQ.data[0].device_token) ? (executeQ.data[0].device_token) : '';
+                    let sqlForGetUserName = `SELECT u.username, u.full_name FROM users u WHERE 
+                    id = ${checkToken.id}
+                    `
+                    let executeQu = await common.customQuery(sqlForGetUserName)
+                    let senderUsername = executeQu.data[0].username;
+                    if(device_token != ''){
+                        const message = {
+                            notification: {
+                              title: 'Follow Request',
+                              body: `${senderUsername} accepted your follow request`,
+                            },
+                            token: `${device_token}`,
+                          };
+                        
+                        let sendNotification = await common.sendNotification(message);
+                        
+                        
+                            let addobject ={
+                                title:message.notification.title,
+                                message:message.notification.body,
+                                user_id : uid,
+                                
+                                created_on: moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss')
+            
+                            }
+                            let addRecord = await common.AddRecords('notification_history', addobject )
+                           
+                    
+                        
+                    }
                     let response = {
                         status : 200,
                         msg : 'Request Accepted'

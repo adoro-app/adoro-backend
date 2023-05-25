@@ -195,7 +195,7 @@ exports.like = async (req, res)=>{
                         `
                        
                         let executeQ = await common.customQuery(sqlForGetUserDeviceToken)
-                        let uid = executeQ.data[0].id
+                        let uid = (executeQ.data[0].id) ? executeQ.data[0].id : ''
                         let device_token = (executeQ.data[0].device_token) ? (executeQ.data[0].device_token) : '';
                         let sqlForGetUserName = `SELECT u.username, u.full_name FROM users u WHERE 
                         id = ${checkToken.id}

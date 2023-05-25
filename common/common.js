@@ -5,8 +5,17 @@ const responseCode = require('../constant/response');
 const jwt = require('jsonwebtoken');
 const _ = require('underscore');
 const _SERVER = 'Production';
+const path = require('path')
+const admin = require('firebase-admin');
+const currentDirectory = process.cwd();
+const filePath = path.join(currentDirectory,  'adoro-app-firebase-adminsdk-nqezd-1c137bb724.json');
+console.log(filePath)
 
+const serviceAccount = require(filePath);
 
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
 
 switch (_SERVER) {
     case "Production":
@@ -286,4 +295,18 @@ module.exports =
             return await error;
         }
     },
+    sendNotification : async (messageObj) => {
+        return new Promise(async (resolve, reject) => {
+            admin.messaging().send(messageObj)
+            .then((response) => {
+              console.log('Notification sent successfully:', response);
+              resolve(response) ;
+            })
+            .catch((error) => {
+              console.error('Error sending notification:', error);
+              resolve('')
+            });
+        })
+        
+    }
 }

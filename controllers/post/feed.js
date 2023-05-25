@@ -10,6 +10,18 @@ const AWS = require('aws-sdk');
 const multer = require('multer');
 path = require('path');
 
+
+
+
+
+//   admin.messaging().send(message)
+//   .then((response) => {
+//     console.log('Notification sent successfully:', response);
+//   })
+//   .catch((error) => {
+//     console.error('Error sending notification:', error);
+//   });
+
 const s3 = new AWS.S3({
     accessKeyId: config.AWS_CREDENTIAL.accessKeyId,
     secretAccessKey: config.AWS_CREDENTIAL.secretAccessKey
@@ -161,13 +173,10 @@ exports.like = async (req, res)=>{
         try{
             let post_id = req.body.post_id;
             let checkToken = await common.checkToken(req.headers);
-            console.log(checkToken)
-            let datenow = new Date()
-            let currentDate = moment(datenow).format('YYYY-MM-DD HH:mm:ss');
-            
+           
             if(checkToken.id){
                 let getrecord = await common.GetRecords('likes', 'id', `user_id = ${checkToken.id} AND post_id = ${post_id}`)
-                console.log(getrecord)
+                // console.log(getrecord)
                 // return false;
                 if(getrecord.data.length == 0){
                     let addobj ={
@@ -179,14 +188,51 @@ exports.like = async (req, res)=>{
                     let addRecord = await common.AddRecords('likes', addobj )
                     // console.log(addRecord)
                     if(addRecord ){
-    
-                        let response = {
-                            status : 200,
-                            msg : 'Successfull'
-                        }
+                        let sqlForGetUserDeviceToken = `SELECT u.device_token, u.id
+                        FROM likes l
+                        JOIN users u ON l.user_id = u.id
+                        WHERE l.post_id = ${post_id}
+                        `
+                       
+                        let executeQ = await common.customQuery(sqlForGetUserDeviceToken)
+                        let uid = executeQ.data[0].id
+                        let device_token = (executeQ.data[0].device_token) ? (executeQ.data[0].device_token) : '';
+                        let sqlForGetUserName = `SELECT u.username, u.full_name FROM users u WHERE 
+                        id = ${checkToken.id}
+                        `
+                        let executeQu = await common.customQuery(sqlForGetUserName)
+                        let senderUsername = executeQu.data[0].username;
+                        if(device_token != ''){
+                            const message = {
+                                notification: {
+                                  title: 'Like',
+                                  body: `${senderUsername} liked your post.`,
+                                },
+                                token: `${device_token}`,
+                              };
+                            
+                            let sendNotification = await common.sendNotification(message);
+                            
+                            
+                                let addobject ={
+                                    title:message.notification.title,
+                                    message:message.notification.body,
+                                    user_id : uid,
+                                    
+                                    created_on: moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss')
+                
+                                }
+                                let addRecord = await common.AddRecords('notification_history', addobject )
+                               
                         
-                        res.send(response)
-                }
+                            let response = {
+                                status : 200,
+                                msg : 'Successfull'
+                            }
+                            
+                            res.send(response)
+                        }
+                    }
                 
                 } else{
                     let response = {

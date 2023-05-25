@@ -370,3 +370,78 @@ throw err;
       
  
 }
+
+exports.support = async (req,res) =>
+{
+  try{
+      let full_name = (req.body.full_name) ? req.body.full_name : "";
+      let email = (req.body.email) ? req.body.email : ""
+      let message = (req.body.message) ? req.body.message : ""
+      let checkToken = await common.checkToken(req.headers);
+
+      
+      if(checkToken.id){
+        let insertObj = {
+            full_name: full_name,
+            email : email,
+            message:message,
+            user_id : checkToken.id
+        }
+          let addRecords = await common.AddRecords('support', insertObj )
+          if(addRecords){
+            let response = {
+                status : 200,
+                msg : 'query added successfully.'
+              }
+              res.send(response)
+          
+          }else{
+            let response = {
+                status : 200,
+                msg : 'something went wrong.'
+              }
+              res.send(response)
+          }
+          
+      }else{
+        res.send(response.UnauthorizedUser(checkToken))
+      }
+      
+        
+    
+    } catch (error) {
+     res.send(error);
+  }
+};
+
+exports.noteFromAdoro = async (req, res) => {
+  // console.log(req.query)
+  try{
+    let checkToken = await common.checkToken(req.headers);
+      if(checkToken.id){
+        let sql = `SELECT * FROM notefromadoro
+        WHERE created_on >= DATE_SUB(NOW(), INTERVAL 1 WEEK);
+        `
+       
+        let fetchpostdetails = await common.customQuery(sql);
+
+        let response = {
+          status : 200,
+          msg : 'post found.',
+          data : fetchpostdetails.data[0]
+         
+        }
+        
+        await res.send(response);
+      
+     
+      
+      }else{
+        res.send(response.UnauthorizedUser(checkToken))
+      }
+      
+
+  }catch(err){
+    await res.send(err);
+  }
+}

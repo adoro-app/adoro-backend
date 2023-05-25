@@ -185,6 +185,12 @@ router.post("/postLikesInComments",  (req, res) => {
 router.post("/deleteLikesInComments",  (req, res) => {
     comment.deleteLikesInComments(req,res)
 });
+router.post("/support",  (req, res) => {
+    User.support(req,res)
+});
+router.get("/noteFromAdoro",  (req, res) => {
+    User.noteFromAdoro(req,res)
+});
 //payment
 
 // router.post("/orders", async (req, res) => {

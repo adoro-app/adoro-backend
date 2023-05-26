@@ -144,6 +144,7 @@ router.get("/getAllcomments",  (req, res) => {
 router.get("/getAllcampaignAndContestApp",  (req, res) => {
     campaign.getAllcampaignAndcontestApp(req,res)
 });
+
 // router.get("/applyCampaign",  (req, res) => {
 //     campaign.applyCampaign(req,res)
 // });
@@ -190,6 +191,9 @@ router.post("/support",  (req, res) => {
 });
 router.get("/noteFromAdoro",  (req, res) => {
     User.noteFromAdoro(req,res)
+});
+router.get("/getNotification",  (req, res) => {
+    User.getNotification(req,res)
 });
 //payment
 

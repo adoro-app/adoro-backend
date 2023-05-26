@@ -53,7 +53,7 @@ exports.sendFollowRequest = async (req, res)=>{
                                
                                 
                               const dataPayload = {
-                                'data_id': user_id,
+                                'data_id': checkToken.id,
                                 'id': (Math.floor(100000 + Math.random() * 900000)).toString(),
                                 'notification_type': 'FollowRequest'
                               }

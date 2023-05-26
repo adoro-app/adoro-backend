@@ -190,7 +190,7 @@ exports.like = async (req, res)=>{
                     if(addRecord ){
                         let sqlForGetUserDeviceToken = `SELECT u.device_token, u.id
                         FROM likes l
-                        JOIN users u ON l.user_id = u.id
+                        JOIN users u ON l.follower_user_id = u.id
                         WHERE l.post_id = ${post_id}
                         `
                        

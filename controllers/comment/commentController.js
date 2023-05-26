@@ -58,13 +58,13 @@ exports.postComment = async (req, res)=>{
                             
                             
                         
-                          const dataPayload = {
-                            'data': {'PostId':postId},
+                          let dataPayload = {
+                            'data_id': postId,
                             'id': (Math.floor(100000 + Math.random() * 900000)).toString(),
                             'notification_type': 'Comment'
                           }
-                         
-                          const message = {
+                          
+                          let message = {
                             token: device_token, // Replace with the actual device token
                             notification: notification,
                             data: dataPayload
@@ -340,7 +340,7 @@ exports.updateComment = async (req, res)=>{
                             }
                         
                           const dataPayload = {
-                            'data': {'PostId':post_id},
+                            'data_id': post_id,
                             'id': (Math.floor(100000 + Math.random() * 900000)).toString(),
                             'notification_type': 'Comment'
                           }

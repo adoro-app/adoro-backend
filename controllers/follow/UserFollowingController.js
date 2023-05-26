@@ -53,7 +53,7 @@ exports.sendFollowRequest = async (req, res)=>{
                                
                                 
                               const dataPayload = {
-                                'data': {'ProfileId':user_id},
+                                'data_id': user_id,
                                 'id': (Math.floor(100000 + Math.random() * 900000)).toString(),
                                 'notification_type': 'FollowRequest'
                               }
@@ -147,7 +147,7 @@ exports.sendFollowRequest = async (req, res)=>{
                            
                         
                           const dataPayload = {
-                            'data': {'ProfileId':user_id},
+                            'data_id': user_id,
                             'id': (Math.floor(100000 + Math.random() * 900000)).toString(),
                             'notification_type': 'ConfirmRequest'
                           }

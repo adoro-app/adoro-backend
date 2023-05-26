@@ -203,13 +203,29 @@ exports.like = async (req, res)=>{
                         let executeQu = await common.customQuery(sqlForGetUserName)
                         let senderUsername = executeQu.data[0].username;
                         if(device_token != ''){
-                            const message = {
-                                notification: {
+                           
+                                const notification = {
                                   title: 'Like',
-                                  body: `${senderUsername} liked your post.`,
-                                },
-                                token: `${device_token}`,
+                                  body: `${senderUsername} liked your post.`
+                                }
+                            
+                              const dataPayload = {
+                                'data_id': post_id,
+                                'id': (Math.floor(100000 + Math.random() * 900000)).toString(),
+                                'notification_type': 'Like'
+                              }
+                             
+                              const message = {
+                                token: device_token, // Replace with the actual device token
+                                notification: notification,
+                                data: dataPayload
                               };
+                              message.data = Object.entries(message.data).reduce((acc, [key, value]) => {
+                                acc[key] = String(value);
+                                return acc;
+                              }, {});
+    
+                              
                             
                             let sendNotification = await common.sendNotification(message);
                             

@@ -114,9 +114,9 @@ exports.sendFollowRequest = async (req, res)=>{
             let currentDate = moment(datenow).format('YYYY-MM-DD HH:mm:ss');
             // console.log(checkToken)
             if(checkToken.id){
-                // let updateObj ={
-                //   status : 'accepted',
-                // }
+                let updateObj ={
+                  status : 'accepted',
+                }
                 console.log(id)
                 console.log(checkToken.id)
                 let sql = `UPDATE follower SET status = 'accepted' WHERE follower_user_id = ${id} AND user_id = ${checkToken.id} ` 
@@ -125,9 +125,8 @@ exports.sendFollowRequest = async (req, res)=>{
                 console.log(updateRec)
                 if(updateRec ){
                     let sqlForGetUserDeviceToken = `SELECT u.device_token, u.id
-                    FROM likes l
-                    JOIN users u ON l.user_id = u.id
-                    WHERE l.post_id = ${id}
+                    FROM users u 
+                    WHERE u.id = ${id}
                     `
                    
                     let executeQ = await common.customQuery(sqlForGetUserDeviceToken)
@@ -147,7 +146,7 @@ exports.sendFollowRequest = async (req, res)=>{
                            
                         
                           const dataPayload = {
-                            'data_id': user_id,
+                            'data_id': checkToken.id,
                             'id': (Math.floor(100000 + Math.random() * 900000)).toString(),
                             'notification_type': 'ConfirmRequest'
                           }

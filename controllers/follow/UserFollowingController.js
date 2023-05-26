@@ -45,14 +45,29 @@ exports.sendFollowRequest = async (req, res)=>{
                         let executeQu = await common.customQuery(sqlForGetUserName)
                         let senderUsername = executeQu.data[0].username;
                         if(device_token != ''){
-                            const message = {
-                                notification: {
+                            
+                               const notification = {
                                   title: 'Follow Request',
                                   body: `${senderUsername} Sent you a follow request`,
-                                },
-                                token: `${device_token}`,
+                                }
+                               
+                                
+                              const dataPayload = {
+                                'data': {'ProfileId':user_id},
+                                'id': (Math.floor(100000 + Math.random() * 900000)).toString(),
+                                'notification_type': 'FollowRequest'
+                              }
+                             
+                              const message = {
+                                token: device_token, // Replace with the actual device token
+                                notification: notification,
+                                data: dataPayload
                               };
-                            
+                              message.data = Object.entries(message.data).reduce((acc, [key, value]) => {
+                                acc[key] = String(value);
+                                return acc;
+                              }, {});
+
                             let sendNotification = await common.sendNotification(message);
                             
                             
@@ -124,14 +139,29 @@ exports.sendFollowRequest = async (req, res)=>{
                     let executeQu = await common.customQuery(sqlForGetUserName)
                     let senderUsername = executeQu.data[0].username;
                     if(device_token != ''){
-                        const message = {
-                            notification: {
+                      
+                            const notification= {
                               title: 'Follow Request',
                               body: `${senderUsername} accepted your follow request`,
-                            },
-                            token: `${device_token}`,
-                          };
+                            }
+                           
                         
+                          const dataPayload = {
+                            'data': {'ProfileId':user_id},
+                            'id': (Math.floor(100000 + Math.random() * 900000)).toString(),
+                            'notification_type': 'ConfirmRequest'
+                          }
+                         
+                          const message = {
+                            token: device_token, // Replace with the actual device token
+                            notification: notification,
+                            data: dataPayload
+                          };
+                          message.data = Object.entries(message.data).reduce((acc, [key, value]) => {
+                            acc[key] = String(value);
+                            return acc;
+                          }, {});
+
                         let sendNotification = await common.sendNotification(message);
                         
                         

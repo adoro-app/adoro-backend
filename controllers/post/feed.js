@@ -188,10 +188,15 @@ exports.like = async (req, res)=>{
                     let addRecord = await common.AddRecords('likes', addobj )
                     // console.log(addRecord)
                     if(addRecord ){
-                        let sqlForGetUserDeviceToken = `SELECT u.device_token, u.id
-                        FROM likes l
-                        JOIN users u ON l.follower_user_id = u.id
-                        WHERE l.post_id = ${post_id}
+                        let sqlForGetUserDeviceToken = `SELECT users.id,
+                        users.device_token
+                    FROM
+                        post
+                    INNER JOIN
+                        users ON post.user_id = users.id
+                    WHERE
+                        post.id = ${post_id};
+                    
                         `
                        
                         let executeQ = await common.customQuery(sqlForGetUserDeviceToken)
@@ -224,12 +229,9 @@ exports.like = async (req, res)=>{
                                 acc[key] = String(value);
                                 return acc;
                               }, {});
-    
-                              
-                            
-                            let sendNotification = await common.sendNotification(message);
-                            
-                            
+                            if(checkToken.id != uid){
+                                
+                                let sendNotification = await common.sendNotification(message);
                                 let addobject ={
                                     title:message.notification.title,
                                     message:message.notification.body,
@@ -239,9 +241,8 @@ exports.like = async (req, res)=>{
                 
                                 }
                                 let addRecord = await common.AddRecords('notification_history', addobject )
-                               
-                        
                             
+                            }
                         }
                         let response = {
                             status : 200,

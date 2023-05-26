@@ -73,9 +73,9 @@ exports.postComment = async (req, res)=>{
                             acc[key] = String(value);
                             return acc;
                           }, {});
-                        let sendNotification = await common.sendNotification(message);
-                        
-                        
+                          if(checkToken.id != uid){
+                            let sendNotification = await common.sendNotification(message);
+
                             let addobject ={
                                 title:message.notification.title,
                                 message:message.notification.body,
@@ -85,6 +85,11 @@ exports.postComment = async (req, res)=>{
             
                             }
                             let addRecord = await common.AddRecords('notification_history', addobject )
+                     
+                        
+                          }
+                        
+                        
                         }
 
                     let response = {
@@ -388,9 +393,8 @@ exports.updateComment = async (req, res)=>{
                             acc[key] = String(value);
                             return acc;
                           }, {});
-                        let sendNotification = await common.sendNotification(message);
-                        
-                        
+                          if (checkToken.id != uid){
+                            let sendNotification = await common.sendNotification(message);
                             let addobject ={
                                 title:message.notification.title,
                                 message:message.notification.body,
@@ -402,6 +406,10 @@ exports.updateComment = async (req, res)=>{
                             let addRecord = await common.AddRecords('notification_history', addobject )
                            
                     
+                          }
+                       
+                        
+                            
                         
                     }
                     

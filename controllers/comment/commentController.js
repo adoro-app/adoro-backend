@@ -302,7 +302,7 @@ exports.updateComment = async (req, res)=>{
                     LEFT JOIN
                         comments_likes ON comments.id = comments_likes.comment_id AND comments_likes.user_id = ${checkToken.id}
                     WHERE
-                        comments.parent_id = ${getUserComments.data[0].comment_id}`
+                        comments.parent_id = ${getUserComments.data[i].comment_id}`
                     // console.log(sqlForFetchChileComment)
                         let sqlForFetchChiledata = await common.customQuery(sqlForFetchChileComment);
                         // console.log('child===',sqlForFetchChiledata)

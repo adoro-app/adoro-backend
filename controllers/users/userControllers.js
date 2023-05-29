@@ -488,3 +488,47 @@ exports.getNotification = async (req, res) => {
     await res.send(err);
   }
 }
+
+exports.search = async (req, res) => {
+  // console.log(req.query)
+  try{
+    let content = req.query.content;
+    let checkToken = await common.checkToken(req.headers);
+      if(checkToken.id){
+        let sql = `SELECT * FROM users WHERE username LIKE '%${content}%' OR full_name LIKE '%${content}%';
+
+        `
+      //  console.log(sql)
+        let fetchpostdetails = await common.customQuery(sql);
+        // console.log(fetchpostdetails)
+        if(fetchpostdetails.data.length > 0){
+          let response = {
+            status : 200,
+            msg : 'users found.',
+            data : fetchpostdetails.data
+           
+          }
+          await res.send(response);
+        }else{
+          let response = {
+            status : 500,
+            msg : 'users Not found.'
+           
+          }
+          await res.send(response);
+        }
+        
+        
+       
+      
+     
+      
+      }else{
+        res.send(response.UnauthorizedUser(checkToken))
+      }
+      
+
+  }catch(err){
+    await res.send(err);
+  }
+}

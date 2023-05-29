@@ -22,6 +22,14 @@ exports.userSignUp = async (req,res) =>
           }
           res.send(response)
         }else{
+          const currentDate = new Date();
+
+          // Convert the date to a timestamp
+          const timestamp = currentDate.getTime();
+
+          console.log(timestamp);
+          const created_at = moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
+          
           let generateOtp = Math.floor(100000 + Math.random() * 900000)
           let insertObj = {
             mobileNo : mobileNo,
@@ -29,7 +37,9 @@ exports.userSignUp = async (req,res) =>
             full_name: full_name,
             email : email,
             otp : generateOtp,
-            device_token: device_token
+            device_token: device_token,
+            refer_id: `${username}_${timestamp}`,
+            created_on : created_at
           }
           let addRecords = await common.AddRecords(config.userTable, insertObj )
           let message = `Hey Creator, Your OTP for signup is ${generateOtp}. Share our app with everyone, not this OTP. Visit adoro.social THINK ELLPSE`

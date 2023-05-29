@@ -195,6 +195,12 @@ router.get("/noteFromAdoro",  (req, res) => {
 router.get("/getNotification",  (req, res) => {
     User.getNotification(req,res)
 });
+router.get("/search",  (req, res) => {
+    User.search(req,res)
+});
+router.get("/checkUserFollowedByMe",  (req, res) => {
+    follow.checkUserFollowedByMe(req,res)
+});
 //payment
 
 // router.post("/orders", async (req, res) => {

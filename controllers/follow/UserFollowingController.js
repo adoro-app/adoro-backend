@@ -347,3 +347,50 @@ exports.sendFollowRequest = async (req, res)=>{
         }
          
     }
+
+    exports.checkUserFollowedByMe = async (req, res)=>{
+        try{
+            let user_id = req.query.user_id;
+            let checkToken = await common.checkToken(req.headers);
+            
+            if(checkToken.id){
+                console.log(checkToken)
+                let sql = `SELECT 
+                CASE
+                    WHEN EXISTS (
+                        SELECT 1 
+                        FROM follower
+                        WHERE user_id = ${user_id} 
+                        AND follower_user_id = ${checkToken.id}
+                        AND status = 'accepted'
+                    )
+                    THEN 'true'
+                    ELSE 'false'
+                END AS follow_status;
+            `
+            
+                let getUser = await common.customQuery(sql);
+                
+                if (getUser.data.length > 0){
+                    let response = {
+                        status : 200,
+                        msg : "Data Available",
+                        data : getUser.data
+                    }
+                    res.send(response)
+                }else{
+                    let response = {
+                        status : 500,
+                        msg : "No data available"
+                    }
+                    res.send(response)
+                }
+            }else{
+                res.send(response.UnauthorizedUser(checkToken))
+            }
+                
+        }catch(err){
+            throw err;
+        }
+         
+    }

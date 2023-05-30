@@ -53,7 +53,7 @@ exports.feed = async (req,res) =>
                    
               offset ${pageNumber * 10}`
         }else if(category == 'relevant'){
-            sqlQryForFeed = `SELECT post.id, post.content, post.user_id, post.content_type, post.content_url, post.tag, users.username, users.full_name, users.image as user_image, COUNT(l.id) AS noOfLikes
+            sqlQryForFeed = `SELECT post.id, post.content, post.user_id, post.content_type, post.content_url, post.tag, users.username, users.full_name, users.image , COUNT(l.id) AS noOfLikes
             FROM post 
             LEFT JOIN follower ON follower.user_id = post.user_id AND follower.status = 'accepted'
             LEFT JOIN users ON post.user_id = users.id

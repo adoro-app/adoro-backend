@@ -43,6 +43,7 @@ exports.userSignUp = async (req,res) =>
               refer_id: `${username}_${timestamp}`,
               created_on : created_at
             }
+            // console.log(insertObj)
             if (referred_by != ''){
               let checkReferId = await common.GetRecords(config.userTable, 'id', `refer_id ='${referred_by}'` )
               if(checkReferId.data.length > 0){
@@ -66,11 +67,12 @@ exports.userSignUp = async (req,res) =>
                 res.send(response)
               }
             }else{
+              // console.log('else')
               let addRecords = await common.AddRecords(config.userTable, insertObj )
               let message = `Hey Creator, Your OTP for signup is ${generateOtp}. Share our app with everyone, not this OTP. Visit adoro.social THINK ELLPSE`
               let url = `https://sms.prowtext.com/sendsms/sendsms.php?apikey=${config.api_key}&type=TEXT&mobile=${mobileNo}&sender=ELLPSE&PEID=${config.PEID}&TemplateId=${config.templateID}&message=${message}`
               let sendMsg = await axios.get(url)
-              //add cointowallet
+              // console.log(sendMsg)
               let response = {
                 status : 200,
                 msg : 'OTP Sent Successfully'
@@ -104,7 +106,7 @@ exports.login = async (req,res) =>
         let generateOtp = Math.floor(100000 + Math.random() * 900000)
         
         let GetRecords = await common.GetRecords(config.userTable, 'id', `mobileNo =${mobileNo}` )
-        console.log(GetRecords.data.length)
+        // console.log(GetRecords.data.length)
         if(GetRecords.data.length > 0){
           
           let message = `Hey Creator, Your OTP for signup is ${generateOtp}. Share our app with everyone, not this OTP. Visit adoro.social THINK ELLPSE`

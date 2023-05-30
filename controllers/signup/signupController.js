@@ -3,6 +3,7 @@ const config = require('../../config/config');
 const axios = require('axios');
 const jwt = require('jsonwebtoken');
 const response = require('../../constant/response');
+const moment = require('moment-timezone');
 
 exports.userSignUp = async (req,res) =>
 {
@@ -24,15 +25,11 @@ exports.userSignUp = async (req,res) =>
           res.send(response)
         }else{
           
-          let GetReferId = await common.GetRecords(config.userTable, 'id', `refer_id ='${referred_by}'` )
           
-          if(GetReferId.data.length > 0) {
             const currentDate = new Date();
 
             // Convert the date to a timestamp
             const timestamp = currentDate.getTime();
-  
-            console.log(timestamp);
             const created_at = moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
             
             let generateOtp = Math.floor(100000 + Math.random() * 900000)
@@ -46,23 +43,43 @@ exports.userSignUp = async (req,res) =>
               refer_id: `${username}_${timestamp}`,
               created_on : created_at
             }
-            let addRecords = await common.AddRecords(config.userTable, insertObj )
-            let message = `Hey Creator, Your OTP for signup is ${generateOtp}. Share our app with everyone, not this OTP. Visit adoro.social THINK ELLPSE`
-            let url = `https://sms.prowtext.com/sendsms/sendsms.php?apikey=${config.api_key}&type=TEXT&mobile=${mobileNo}&sender=ELLPSE&PEID=${config.PEID}&TemplateId=${config.templateID}&message=${message}`
-            let sendMsg = await axios.get(url)
-            //add cointowallet
-            let response = {
-              status : 200,
-              msg : 'OTP Sent Successfully'
+            if (referred_by != ''){
+              let checkReferId = await common.GetRecords(config.userTable, 'id', `refer_id ='${referred_by}'` )
+              if(checkReferId.data.length > 0){
+                let addRecords = await common.AddRecords(config.userTable, insertObj )
+                let message = `Hey Creator, Your OTP for signup is ${generateOtp}. Share our app with everyone, not this OTP. Visit adoro.social THINK ELLPSE`
+                let url = `https://sms.prowtext.com/sendsms/sendsms.php?apikey=${config.api_key}&type=TEXT&mobile=${mobileNo}&sender=ELLPSE&PEID=${config.PEID}&TemplateId=${config.templateID}&message=${message}`
+                let sendMsg = await axios.get(url)
+                //add cointowallet
+                let addCoinToWallet = await common.addCoinToWallet('signup', checkReferId.data[0].id);
+                let response = {
+                  status : 200,
+                  msg : 'OTP Sent Successfully'
+                }
+                res.send(response)
+             
+              }else{
+                let response = {
+                  status : 500,
+                  msg : 'Incorrect Refer Id.'
+                }
+                res.send(response)
+              }
+            }else{
+              let addRecords = await common.AddRecords(config.userTable, insertObj )
+              let message = `Hey Creator, Your OTP for signup is ${generateOtp}. Share our app with everyone, not this OTP. Visit adoro.social THINK ELLPSE`
+              let url = `https://sms.prowtext.com/sendsms/sendsms.php?apikey=${config.api_key}&type=TEXT&mobile=${mobileNo}&sender=ELLPSE&PEID=${config.PEID}&TemplateId=${config.templateID}&message=${message}`
+              let sendMsg = await axios.get(url)
+              //add cointowallet
+              let response = {
+                status : 200,
+                msg : 'OTP Sent Successfully'
+              }
+              res.send(response)
+           
             }
-            res.send(response)
-          }else{
-            let response = {
-              status : 500,
-              msg : 'Incorrect Refer Id'
-            }
-            res.send(response)
-          }
+            
+           
           
         }
         

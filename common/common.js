@@ -10,6 +10,7 @@ const admin = require('firebase-admin');
 const currentDirectory = process.cwd();
 const filePath = path.join(currentDirectory,  'adoro-app-firebase-adminsdk-nqezd-1c137bb724.json');
 console.log(filePath)
+const moment = require('moment-timezone');
 
 const serviceAccount = require(filePath);
 
@@ -63,6 +64,7 @@ module.exports =
         
         GetRecords: async (table, fields, where = '') => {
             try {
+                
                 return new Promise(async (resolve, reject) => {
                     let responseObj = {};
                     if (_.isEmpty(fields)) {
@@ -297,6 +299,7 @@ module.exports =
     },
     sendNotification : async (messageObj) => {
         return new Promise(async (resolve, reject) => {
+            console.log(messageObj)
             admin.messaging().send(messageObj)
             .then((response) => {
               console.log('Notification sent successfully:', response);
@@ -308,5 +311,68 @@ module.exports =
             });
         })
         
+    },
+    addCoinToWallet: async (action, id) => {
+        try {
+           
+
+            return new Promise(async (resolve, reject) => {
+                let coinValue = 0
+                if (action == 'signup'){
+                    coinValue = 1
+                }
+                let responseObj = {};
+                
+                try {
+                   let sql = `SELECT id, balance from wallet where user_id = '${id}'`;
+                   
+                    dbConnection.query(sql, async (err, result) => {
+                       if(err){
+                        throw err;
+                       }else{
+                        console.log(result)
+                        if(result.length > 0){
+                            let currentBalance = (result[0].balance) ? parseInt(result[0].balance) : 0
+                            let newBalance = (currentBalance + coinValue).toString()
+                            let updated_on = moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss')
+                            let sqlforu = `UPDATE wallet
+                            SET balance = ${newBalance}, updated_on = '${updated_on}'
+                            WHERE id  = ${result[0].id}`;
+                       
+                                dbConnection.query(sqlforu, async (err, result) => {
+                                if(err){
+                                    throw err;
+                                }else{
+                                    resolve('coin added to wallet')
+                                
+                                }
+                            })
+                        }else{
+                        // let currentBalance = (result.data[0].balance) ? parseInt(result.data[0].balance) : 0
+                        let newBalance = coinValue.toString()
+                        let currentD = moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss')
+                        let sqlforin = `INSERT INTO wallet (user_id, balance, created_at, updated_on)
+                        VALUES ('${id}', '${newBalance}', '${currentD}', '${currentD}');
+                        `;
+                            console.log(sqlforin)
+                            dbConnection.query(sqlforin, async (err, result) => {
+                            if(err){
+                                throw err;
+                            }else{
+                                resolve('coin added to wallet')
+                            
+                            }
+                        })
+                        }
+                        
+                       }
+                    })
+                } catch (error) {
+                    return await error;
+                }
+            });
+        } catch (error) {
+            return await error;
+        }
     }
 }

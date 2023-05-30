@@ -544,3 +544,26 @@ exports.search = async (req, res) => {
     await res.send(err);
   }
 }
+exports.getWalletBalance = async (req,res) =>
+{
+  try{
+    let checkToken = await common.checkToken(req.headers);
+
+      if (checkToken.id){ 
+        let GetRecords = await common.GetRecords('wallet', 'id, user_id, balance', `user_id = '${checkToken.id}'` )
+        let response = {
+          status : 200,
+          msg : 'data found.',
+          data : GetRecords.data
+         
+        }
+        await res.send(response);
+        
+        
+      }else{
+        res.send(response.UnauthorizedUser(checkToken))
+      }
+    } catch (error) {
+     res.send(error);
+  }
+};

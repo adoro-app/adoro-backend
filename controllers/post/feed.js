@@ -32,14 +32,14 @@ exports.feed = async (req,res) =>
     let responseObj = {}
      let category = req.query.category;
      let pageNumber = req.query.pageNumber;
-     console.log('token==', req.headers)
+    //  console.log('token==', req.headers)
      let checkToken = await common.checkToken(req.headers);
     //  console.log(checkToken)
      if (checkToken.id)
      {
         let sqlQryForFeed = '';
         if (category == 'trending'){
-             sqlQryForFeed = `SELECT p.id, p.user_id, p.content, p.content_type, p.content_url, p.tag, p.created_on, users.username, users.full_name, users.image, COUNT(l.id) AS noOfLikes 
+             sqlQryForFeed = `SELECT p.id, p.user_id, p.content, p.content_type, p.content_url, p.created_on, users.username, users.full_name, users.image, COUNT(l.id) AS noOfLikes 
              FROM post p 
              LEFT JOIN likes l ON p.id = l.post_id
              LEFT JOIN users ON p.user_id = users.id
@@ -53,7 +53,7 @@ exports.feed = async (req,res) =>
                    
               offset ${pageNumber * 10}`
         }else if(category == 'relevant'){
-            sqlQryForFeed = `SELECT post.id, post.content, post.user_id, post.content_type, post.content_url, post.tag, users.username, users.full_name, users.image , COUNT(l.id) AS noOfLikes
+            sqlQryForFeed = `SELECT post.id, post.content, post.user_id, post.content_type, post.content_url, users.username, users.full_name, users.image , COUNT(l.id) AS noOfLikes
             FROM post 
             LEFT JOIN follower ON follower.user_id = post.user_id AND follower.status = 'accepted'
             LEFT JOIN users ON post.user_id = users.id
@@ -71,20 +71,20 @@ exports.feed = async (req,res) =>
             let getcategoryId = await common.customQuery(sqlforgetcategoryId);
             let categoryId = getcategoryId.data[0].id;
             
-            sqlQryForFeed = `SELECT p.id, p.user_id, p.content, p.content_type, p.content_url, p.tag, p.created_on,
+            sqlQryForFeed = `SELECT p.id, p.user_id, p.content, p.content_type, p.content_url,  p.created_on,
             users.username, users.full_name, users.image, COUNT(DISTINCT l.id) AS noOfLikes
-     FROM post p  
-     LEFT JOIN users ON p.user_id = users.id
-     LEFT JOIN likes l ON p.id = l.post_id
-     LEFT JOIN user_report_post urp ON p.id = urp.post_id AND urp.user_id = ${checkToken.id}
-     WHERE urp.id IS NULL AND  p.category_id = ${categoryId}
-     GROUP BY p.id
-     ORDER BY p.created_on DESC
-     LIMIT 10 offset ${pageNumber * 10}`
+            FROM post p  
+            LEFT JOIN users ON p.user_id = users.id
+            LEFT JOIN likes l ON p.id = l.post_id
+            LEFT JOIN user_report_post urp ON p.id = urp.post_id AND urp.user_id = ${checkToken.id}
+            WHERE urp.id IS NULL AND  p.category_id = ${categoryId}
+            GROUP BY p.id
+            ORDER BY p.created_on DESC
+            LIMIT 10 offset ${pageNumber * 10}`
         }
-        console.log(sqlQryForFeed)
+        // console.log(sqlQryForFeed)
         let getData = await common.customQuery(sqlQryForFeed);
-        // console.log(getData);
+        console.log(getData.data.length);
         if (getData.data.length > 0){
                 responseObj = getData.data;
                 let result = [];
@@ -144,12 +144,22 @@ async function fetchData(res, uid){
             // console.log('fetchcomment', fetchCommentsCount.data[0].total_comments)
             res['comments'] = fetchCommentsCount.data[0].total_comments;
             
-            if(!! res.tag) {
+            
             //    console.log('here')
-                let sqlForFetchUsertag = `SELECT id, username, full_name, image  FROM users WHERE id IN ${res.tag}`;
-                let FetchUsertag = await common.customQuery(sqlForFetchUsertag);
-                res['tag_user'] = FetchUsertag.data
-            }
+            let sqlForFetchUsertag = `SELECT
+            users.id,
+            users.username,
+            users.full_name
+            FROM
+            post_tags
+            JOIN
+            users ON post_tags.user_id = users.id
+            WHERE
+            post_tags.post_id = ${res.id}
+            `;
+            let FetchUsertag = await common.customQuery(sqlForFetchUsertag);
+            res['tag_user'] = FetchUsertag.data
+            
             let sqlForFollowedByMe = `SELECT id FROM follower WHERE follower_user_id = ${uid} AND user_id = ${res.user_id}`
             let FetchFollowedUser = await common.customQuery(sqlForFollowedByMe);
             if(FetchFollowedUser.data.length > 0){
@@ -278,10 +288,13 @@ exports.like = async (req, res)=>{
             let checkToken = await common.checkToken(req.headers);
             let datenow = new Date()
             let currentDate = moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss')
-            console.log(req.file)
-            
+            // console.log(req.file)
+            let tag = JSON.parse(req.body.tag)
+            // console.log(tag.length)
+            // console.log(JSON.parse(req.body.tag.length))
+            // return true;
             if(checkToken.id){
-                console.log(req.file)
+                // console.log(req.file)
                 const filestream = fs.createReadStream(req.file.path)
                 const params = {
                     Bucket: config.aws_bucket_name_post,
@@ -307,6 +320,14 @@ exports.like = async (req, res)=>{
                 
                 let addObj = await common.AddRecords('post', addobj )
                 if (addObj) {
+                    for (let i = 0; i < tag.length; i++){
+                        let insertObj = {
+                            user_id : tag[i],
+                            post_id : addObj.data.insertId
+                        }
+                        await common.AddRecords('post_tags', insertObj )
+
+                    }
                     fs.unlink(path.join(__dirname, `../../uploads/${req.file.filename}`), function (err) {
                         if (err) throw err;
                         // if no error, file has been deleted successfully

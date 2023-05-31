@@ -219,13 +219,15 @@ exports.getProfileById = async (req, res) => {
         let getPostData = await common.customQuery(sqlForPost);
         getProfile.data[0]['posts'] = getPostData.data
         // console.log(getProfile)
-  //       let sqlFormentionedPost = `SELECT p.id, p.content, p.content_type, p.content_url, p.created_on 
-  //       FROM post p WHERE p.tag LIKE '%${userId}%';
-        
-  // `     
-  //       let getmentioneData = await common.customQuery(sqlFormentionedPost);
-        // console.log(getmentioneData)
-        getProfile.data[0]['mention'] = []
+        let sqlFormentionedPost = `SELECT p.id, p.content,p.content_type, p.content_url, p.created_on, u.username, u.image
+        FROM post p
+        JOIN post_tags pt ON p.id = pt.post_id
+        JOIN users u ON pt.user_id = u.id
+        WHERE pt.user_id = '${userId}'`
+
+        let getmentioneData = await common.customQuery(sqlFormentionedPost);
+        console.log(getmentioneData)
+        getProfile.data[0]['mention'] = getmentioneData.data
         // if(my_profile == false){
         let sqlForFollowedByMe = `SELECT id FROM follower WHERE follower_user_id = ${checkToken.id} AND user_id = ${userId} AND status = 'accepted'`
         console.log(sqlForFollowedByMe)

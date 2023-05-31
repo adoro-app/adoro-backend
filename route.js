@@ -53,6 +53,10 @@ router.post("/createPost", upload.single('content_url'), (req, res) => {
 
     post.createPost(req,res)
 });
+router.post("/createPostByChooseTemplate", upload.single('content_url'), (req, res) => {
+
+    post.createPostByChooseTemplate(req,res)
+});
 router.post("/deleteLike",  (req, res) => {
     post.deleteLike(req,res)
 });

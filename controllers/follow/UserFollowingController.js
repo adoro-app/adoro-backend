@@ -69,7 +69,7 @@ exports.sendFollowRequest = async (req, res)=>{
                               }, {});
 
                             let sendNotification = await common.sendNotification(message);
-                            
+                            //confirm
                             
                                 let addobject ={
                                     title:message.notification.title,
@@ -165,14 +165,12 @@ exports.sendFollowRequest = async (req, res)=>{
                         
                         
                             let addobject ={
-                                title:message.notification.title,
+                                title:'Request Accepted',
                                 message:message.notification.body,
-                                user_id : uid,
-                                
                                 created_on: moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss')
             
                             }
-                            let addRecord = await common.AddRecords('notification_history', addobject )
+                            let addRecord = await common.acceptFollowReq('notification_history', addobject, `user_id = ${uid}` )
                            
                     
                         
@@ -216,6 +214,7 @@ exports.sendFollowRequest = async (req, res)=>{
                      deleteRecord = await common.deleteRecords('follower', `user_id = ${id} AND follower_user_id = ${checkToken.id}` )
                 }if(flag == 'delete'){
                      deleteRecord = await common.deleteRecords('follower', `user_id = ${checkToken.id} AND follower_user_id = ${id}` )
+                     let deleteNotiHistory = await common.deleteRecords('notification_history',`user_id = ${checkToken.id}`)
                 }else{
                     deleteRecord = await common.deleteRecords('follower', `user_id = ${id} AND follower_user_id = ${checkToken.id}` )
                 }

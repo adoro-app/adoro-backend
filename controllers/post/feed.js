@@ -290,15 +290,19 @@ exports.like = async (req, res)=>{
             let currentDate = moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss')
             // console.log(req.file)
             let tag = JSON.parse(req.body.tag)
+            
             // console.log(tag.length)
             // console.log(JSON.parse(req.body.tag.length))
             // return true;
+
             if(checkToken.id){
                 // console.log(req.file)
                 const filestream = fs.createReadStream(req.file.path)
+                
+                const fileExtension = req.file.originalname.split('.').pop();
                 const params = {
                     Bucket: config.aws_bucket_name_post,
-                    Key: req.file.originalname,
+                    Key: `${uuidv4()}.${fileExtension}`,
                     Body: filestream
                 }
                 
@@ -543,3 +547,69 @@ exports.like = async (req, res)=>{
 
   
 
+    // const axios = require('axios');
+const { v4: uuidv4 } = require('uuid');
+
+exports.createPostByChooseTemplate = async (req, res) => {
+    try {
+        let checkToken = await common.checkToken(req.headers);
+        let currentDate = moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
+        let tag = req.body.tag;
+
+        if (typeof tag === 'string') {
+            tag = JSON.parse(tag);
+        }
+
+        if (checkToken.id) {
+            console.log(req.body.url)
+            const fileExtension = req.body.url.split('.').pop();
+            const imageResponse = await axios.get(req.body.url, { responseType: 'arraybuffer' });
+            const imageBuffer = Buffer.from(imageResponse.data, 'binary');
+            const imageKey = `${uuidv4()}.${fileExtension}`;
+
+            const uploadParams = {
+                Bucket: config.aws_bucket_name_post,
+                Key: imageKey,
+                Body: imageBuffer,
+            };
+
+            let data = await s3.upload(uploadParams).promise();
+            let addobj = {
+                user_id: checkToken.id,
+                category_id: req.body.category_id,
+                content: req.body.content,
+                content_type: req.body.content_type,
+                content_url: data.Location,
+               
+                created_on: currentDate,
+            };
+
+            let addObj = await common.AddRecords('post', addobj);
+            if (addObj) {
+                for (let i = 0; i < tag.length; i++) {
+                    let insertObj = {
+                        user_id: tag[i],
+                        post_id: addObj.data.insertId,
+                    };
+                    await common.AddRecords('post_tags', insertObj);
+                }
+
+                let response = {
+                    status: 200,
+                    msg: "Data added successfully.",
+                };
+                res.send(response);
+            } else {
+                let response = {
+                    status: 500,
+                    msg: "Something went wrong",
+                };
+                res.send(response);
+            }
+        } else {
+            res.send(response.UnauthorizedUser(checkToken));
+        }
+    } catch (err) {
+        throw err;
+    }
+};

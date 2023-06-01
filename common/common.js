@@ -117,7 +117,8 @@ module.exports =
                                 reject(responseCode.dbErrorResponse(err));
                             }
                             else (!_.isEmpty(result))
-                            {console.log(result)
+                            {
+                                // console.log(result)
                                 responseObj = await responseCode.recordAddedSuccessResponse(result);
                             }
                             // console.log(responseObj)

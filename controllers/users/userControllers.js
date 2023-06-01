@@ -569,3 +569,46 @@ exports.getWalletBalance = async (req,res) =>
      res.send(error);
   }
 };
+
+exports.changeNotificationStatus = async (req,res) =>
+{
+  try{
+    let checkToken = await common.checkToken(req.headers);
+
+      if (checkToken.id){ 
+        let GetRecords = await common.GetRecords('users', 'notification', `id = '${checkToken.id}'` )
+        let updateObj;
+        // console.log(GetRecords)
+        if(GetRecords.data[0].notification == 'true'){
+          updateObj ={
+            notification : 'false'
+          }
+        }else{
+          updateObj ={
+            notification : 'true'
+          }
+        }
+        let updateRec = await common.UpdateRecords('users',updateObj,checkToken.id)
+         
+        // console.log(updateRec.data.affectedRows)
+        if(updateRec.data.affectedRows == 1){
+           // console.log(updateRec)
+          // if (updateRec.)
+          let response = {
+            status : 200,
+            msg : 'Record Updated.',
+           
+           
+          }
+          await res.send(response);
+          
+          
+        }
+        
+      }else{
+        res.send(response.UnauthorizedUser(checkToken))
+      }
+    } catch (error) {
+     res.send(error);
+  }
+};

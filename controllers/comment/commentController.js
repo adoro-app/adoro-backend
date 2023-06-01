@@ -34,7 +34,7 @@ exports.postComment = async (req, res)=>{
                 }
                 let addRecord = await common.AddRecords('comments', addobj )
                 if(addRecord ){
-                    let sqlForGetUserDeviceToken = `SELECT u.device_token, u.id
+                    let sqlForGetUserDeviceToken = `SELECT u.device_token, u.id , notification
                     FROM post AS p
                     JOIN users AS u ON p.user_id = u.id
                     WHERE p.id = ${postId}
@@ -43,13 +43,15 @@ exports.postComment = async (req, res)=>{
                    
                     let executeQ = await common.customQuery(sqlForGetUserDeviceToken)
                     let uid = (executeQ.data[0].id) ? executeQ.data[0].id : ''
+                    let notification = (executeQ.data[0].notification) ? executeQ.data[0].notification : ''
                     let device_token = (executeQ.data[0].device_token) ? executeQ.data[0].device_token : '';
                     let sqlForGetUserName = `SELECT u.username, u.full_name FROM users u WHERE 
                     id = ${checkToken.id}
                     `
                     let executeQu = await common.customQuery(sqlForGetUserName)
                     let senderUsername = executeQu.data[0].username;
-                    if(device_token != ''){
+                   
+                    if(device_token != '' && notification == 'true'){
                         
                             const notification = {
                               title: 'Comment',
@@ -355,7 +357,7 @@ exports.updateComment = async (req, res)=>{
                 }
                 let addRecord = await common.AddRecords('comments_likes', addobj )
                 if(addRecord ){
-                    let sqlForGetUserDeviceToken = `SELECT u.device_token, u.id
+                    let sqlForGetUserDeviceToken = `SELECT u.device_token, u.id, u.notification
                     FROM comments_likes cl
                     JOIN comments c ON cl.comment_id = c.id
                     JOIN users u ON c.user_id = u.id
@@ -364,13 +366,14 @@ exports.updateComment = async (req, res)=>{
                    
                     let executeQ = await common.customQuery(sqlForGetUserDeviceToken)
                     let uid = (executeQ.data[0].id) ? executeQ.data[0].id : ''
+                    let notification = (executeQ.data[0].notification) ? executeQ.data[0].notification : ''
                     let device_token = (executeQ.data[0].device_token) ? executeQ.data[0].device_token : '';
                     let sqlForGetUserName = `SELECT u.username, u.full_name FROM users u WHERE 
                     id = ${checkToken.id}
                     `
                     let executeQu = await common.customQuery(sqlForGetUserName)
                     let senderUsername = executeQu.data[0].username;
-                    if(device_token != ''){
+                    if(device_token != '' && notification == 'true'){
                       
                            const notification = {
                               title: 'Like',

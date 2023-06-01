@@ -31,20 +31,22 @@ exports.sendFollowRequest = async (req, res)=>{
                 let addRecord = await common.AddRecords('follower', addobj )
                 if(addRecord ){
 
-                    let sqlForGetUserDeviceToken = `SELECT u.device_token, u.id
+                    let sqlForGetUserDeviceToken = `SELECT u.device_token, u.id, notification
                         FROM users u
                         WHERE u.id = ${user_id}
                         `
                        
                         let executeQ = await common.customQuery(sqlForGetUserDeviceToken)
                         let uid = (executeQ.data[0].id) ? executeQ.data[0].id : ''
+                        let notification = (executeQ.data[0].notification) ? executeQ.data[0].notification : ''
+                       
                         let device_token = (executeQ.data[0].device_token) ? executeQ.data[0].device_token : '';
                         let sqlForGetUserName = `SELECT u.username, u.full_name FROM users u WHERE 
                         id = ${checkToken.id}
                         `
                         let executeQu = await common.customQuery(sqlForGetUserName)
                         let senderUsername = executeQu.data[0].username;
-                        if(device_token != ''){
+                        if(device_token != '' && notification == 'true'){
                             
                                const notification = {
                                   title: 'Follow Request',
@@ -124,20 +126,21 @@ exports.sendFollowRequest = async (req, res)=>{
                 let updateRec = await common.customQuery(sql);
                 console.log(updateRec)
                 if(updateRec ){
-                    let sqlForGetUserDeviceToken = `SELECT u.device_token, u.id
+                    let sqlForGetUserDeviceToken = `SELECT u.device_token, u.id, u.notification
                     FROM users u 
                     WHERE u.id = ${id}
                     `
                    
                     let executeQ = await common.customQuery(sqlForGetUserDeviceToken)
                     let uid = (executeQ.data[0].id) ? executeQ.data[0].id : ''
+                    let notification = (executeQ.data[0].notification) ? executeQ.data[0].notification : ''
                     let device_token = (executeQ.data[0].device_token) ? executeQ.data[0].device_token : '';
                     let sqlForGetUserName = `SELECT u.username, u.full_name FROM users u WHERE 
                     id = ${checkToken.id}
                     `
                     let executeQu = await common.customQuery(sqlForGetUserName)
                     let senderUsername = executeQu.data[0].username;
-                    if(device_token != ''){
+                    if(device_token != '' && notification == 'true'){
                       
                             const notification= {
                               title: 'Follow Request',

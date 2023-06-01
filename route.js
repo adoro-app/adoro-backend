@@ -208,6 +208,9 @@ router.get("/checkUserFollowedByMe",  (req, res) => {
 router.get("/getWalletBalance",  (req, res) => {
     User.getWalletBalance(req,res)
 });
+router.get("/changeNotificationStatus",  (req, res) => {
+    User.changeNotificationStatus(req,res)
+});
 //payment
 
 // router.post("/orders", async (req, res) => {

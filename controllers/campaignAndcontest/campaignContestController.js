@@ -48,7 +48,9 @@ const s3 = new AWS.S3({
                     }
                     for (let j = 0; j < getAllContests.data.length; j++){
                         let flagForCon = "false";
-                        let checkAppliedContest = `SELECT * FROM user_applied_contest WHERE user_id = '${checkToken.id}' AND contest_id = '${getAllCampaign.data[j].contest_id}' `
+                        console.log(getAllContests.data[j])
+                        let checkAppliedContest = `SELECT * FROM user_applied_contest WHERE user_id = '${checkToken.id}' AND contest_id = '${getAllCampaign.data[j].id}' `
+                        console.log(checkAppliedContest)
                         let getAppliedContest = await common.customQuery(checkAppliedContest);
                         if(getAppliedContest.data.length > 0){
                             flagForCon = "true"

@@ -718,33 +718,41 @@ exports.validateWithdrawOTP = async (req,res) =>
       
        
         let GetRecords = await common.GetRecords(config.userTable, '*', `id = ${checkToken.id}` )
-       
+        let GetWalletBalance = await common.GetRecords('wallet', '*', `user_id = ${checkToken.id}`)
         if(GetRecords.data[0].withdrawal_otp == otp){
-          let updateObj = {
-            balance: '0'
-          }
-          let updateQ = `UPDATE wallet
-          SET balance = 0
-          WHERE user_id = ${checkToken.id};
-          `;
-          let updateRecords = await common.customQuery(updateQ)
-          
-          if (updateRecords){
-            let response = {
-              status : 200,
-              msg : 'Your request for Withdrawal coin is successfully submitted.',
-              
-  
+          if(GetWalletBalance.data.balance != '0'){
+            let updateObj = {
+              balance: '0'
             }
-            res.send(response)
+            let updateQ = `UPDATE wallet
+            SET balance = 0
+            WHERE user_id = ${checkToken.id};
+            `;
+            let updateRecords = await common.customQuery(updateQ)
+            let insertObj = {
+              user_id : checkToken.id,
+              requested_amount: GetWalletBalance.data[0].balance,
+              created_at : moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss')
+            }
+            let insertRecord = await common.AddRecords('withdrawal_request' , insertObj)
+            if (insertRecord){
+              let response = {
+                status : 200,
+                msg : 'Your request for Withdrawal coin is successfully submitted.',
+                
+    
+              }
+              res.send(response)
+            }
           }else{
             let response = {
               status : 500,
-              msg : 'Something went wrong.'
+              msg : 'You dont have enough coin to withdrawal.'
             }
             res.send(response)
-
           }
+          
+          
           
         }else{
           let response = {
@@ -753,7 +761,7 @@ exports.validateWithdrawOTP = async (req,res) =>
           }
           res.send(response)
         }
-        
+      
       }else{
         res.send(response.UnauthorizedUser(checkToken))
       }

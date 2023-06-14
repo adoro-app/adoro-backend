@@ -708,64 +708,66 @@ exports.send_withdrawal_otp = async (req,res) =>
   }
 };
 
-exports.validateWithdrawOTP = async (req,res) =>
-{
-  try{
-    
-      let otp = (req.body.otp) ? req.body.otp : ""
-      let checkToken = await common.checkToken(req.headers);
-      if (checkToken.id){ 
-      
-       
-        let GetRecords = await common.GetRecords(config.userTable, '*', `id = ${checkToken.id}` )
-        let GetWalletBalance = await common.GetRecords('wallet', '*', `user_id = ${checkToken.id}`)
-        if(GetRecords.data[0].withdrawal_otp == otp){
-          if(GetWalletBalance.data.balance != '0'){
-            let updateObj = {
-              balance: '0'
-            }
-            let updateQ = `UPDATE wallet
-            SET balance = 0
-            WHERE user_id = ${checkToken.id};
-            `;
-            let updateRecords = await common.customQuery(updateQ)
-            let insertObj = {
-              user_id : checkToken.id,
-              requested_amount: GetWalletBalance.data[0].balance,
-              created_at : moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss')
-            }
-            let insertRecord = await common.AddRecords('withdrawal_request' , insertObj)
-            if (insertRecord){
-              let response = {
-                status : 200,
-                msg : 'Your request for Withdrawal coin is successfully submitted.',
-                
-    
-              }
-              res.send(response)
-            }
-          }else{
+exports.validateWithdrawOTP = async (req, res) => {
+  try {
+    let otp = req.body.otp || "";
+    let amount = parseFloat(req.body.amount) || 0;
+    let checkToken = await common.checkToken(req.headers);
+
+    if (checkToken.id) {
+      let GetRecords = await common.GetRecords(config.userTable, '*', `id = ${checkToken.id}`);
+      let GetWalletBalance = await common.GetRecords('wallet', '*', `user_id = ${checkToken.id}`);
+
+      if (GetRecords.data[0].withdrawal_otp === otp) {
+        let walletAmount = parseFloat(GetWalletBalance.data[0].balance);
+
+        if (walletAmount >= amount) {
+          if (amount === 0) {
             let response = {
-              status : 500,
-              msg : 'You dont have enough coin to withdrawal.'
+              status: 500,
+              msg: 'Please enter a valid amount.',
+            };
+            res.send(response);
+          } else {
+            let updatedBalance = walletAmount - amount;
+            console.log(updatedBalance);
+
+            let updateQ = `UPDATE wallet SET balance = '${updatedBalance}' WHERE user_id = ${checkToken.id};`;
+            let updateRecords = await common.customQuery(updateQ);
+
+            let insertObj = {
+              user_id: checkToken.id,
+              requested_amount: amount,
+              created_at: moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss'),
+            };
+            let insertRecord = await common.AddRecords('withdrawal_request', insertObj);
+
+            if (insertRecord) {
+              let response = {
+                status: 200,
+                msg: 'Your request for withdrawal coin has been successfully submitted.',
+              };
+              res.send(response);
             }
-            res.send(response)
           }
-          
-          
-          
-        }else{
+        } else {
           let response = {
-            status : 500,
-            msg : 'Incorrect OTP'
-          }
-          res.send(response)
+            status: 500,
+            msg: 'You do not have enough coin to withdraw.',
+          };
+          res.send(response);
         }
-      
-      }else{
-        res.send(response.UnauthorizedUser(checkToken))
+      } else {
+        let response = {
+          status: 500,
+          msg: 'Incorrect OTP',
+        };
+        res.send(response);
       }
-      } catch (error) {
-     res.send(error);
+    } else {
+      res.send(response.UnauthorizedUser(checkToken));
+    }
+  } catch (error) {
+    res.send(error);
   }
 };

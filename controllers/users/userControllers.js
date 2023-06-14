@@ -10,6 +10,7 @@ const path = require('path');
 // const { get } = require('underscore');
 const response = require('../../constant/response');
 const { reject } = require('underscore');
+const axios = require('axios')
 
 const s3 = new AWS.S3({
     accessKeyId: config.AWS_CREDENTIAL.accessKeyId,
@@ -609,6 +610,154 @@ exports.changeNotificationStatus = async (req,res) =>
         res.send(response.UnauthorizedUser(checkToken))
       }
     } catch (error) {
+     res.send(error);
+  }
+};
+
+exports.getResult = async (req,res) =>
+{
+  try{
+    let checkToken = await common.checkToken(req.headers);
+    let tag = (req.query.tag) ? req.query.tag : '';
+
+
+      if (checkToken.id && tag != ''){ 
+        let GetRecords = await common.GetRecords('users', 'notification', `id = '${checkToken.id}'` )
+        let updateObj;
+        // console.log(GetRecords)
+        if(GetRecords.data[0].notification == 'true'){
+          updateObj ={
+            notification : 'false'
+          }
+        }else{
+          updateObj ={
+            notification : 'true'
+          }
+        }
+        let updateRec = await common.UpdateRecords('users',updateObj,checkToken.id)
+         
+        // console.log(updateRec.data.affectedRows)
+        if(updateRec.data.affectedRows == 1){
+           // console.log(updateRec)
+          // if (updateRec.)
+          let response = {
+            status : 200,
+            msg : 'Record Updated.',
+           
+           
+          }
+          await res.send(response);
+          
+          
+        }
+        
+      }else{
+        res.send(response.UnauthorizedUser(checkToken))
+      }
+    } catch (error) {
+     res.send(error);
+  }
+};
+
+
+exports.send_withdrawal_otp = async (req,res) =>
+{
+  try{
+    let checkToken = await common.checkToken(req.headers);
+   
+
+      if (checkToken.id){ 
+        let GetRecords = await common.GetRecords('users', 'id, mobileNo', `id = '${checkToken.id}'` )
+        let updateObj;
+        console.log(GetRecords)
+        if(GetRecords.data.length > 0){
+          let mobileNo = GetRecords.data[0].mobileNo;
+          let generateOtp = Math.floor(100000 + Math.random() * 900000)
+        
+          console.log(mobileNo)
+          let message = `Hey Creator, Your OTP for Withdraw coin is ${generateOtp}. Share our app with everyone, not this OTP. Visit adoro.social THINK ELLPSE`
+          let url = `https://sms.prowtext.com/sendsms/sendsms.php?apikey=${config.api_key}&type=TEXT&mobile=${mobileNo}&sender=ELLPSE&PEID=${config.PEID}&TemplateId=${config.templateID}&message=${message}`
+          console.log(url)
+          let sendMsg = await axios.get(url)
+          console.log(sendMsg)
+          let updateObj = {"withdrawal_otp" : generateOtp}
+        
+        let updateRec = await common.UpdateRecords('users',updateObj,checkToken.id)
+         
+        // console.log(updateRec.data.affectedRows)
+        if(updateRec.data.affectedRows == 1){
+           // console.log(updateRec)
+          // if (updateRec.)
+          let response = {
+            status : 200,
+            msg : 'OTP Sent Successfully.',
+           
+           
+          }
+          await res.send(response);
+          
+          
+        }
+      }
+        
+      }else{
+        res.send(response.UnauthorizedUser(checkToken))
+      }
+    } catch (error) {
+     res.send(error);
+  }
+};
+
+exports.validateWithdrawOTP = async (req,res) =>
+{
+  try{
+    
+      let otp = (req.body.otp) ? req.body.otp : ""
+      let checkToken = await common.checkToken(req.headers);
+      if (checkToken.id){ 
+      
+       
+        let GetRecords = await common.GetRecords(config.userTable, '*', `id = ${checkToken.id}` )
+       
+        if(GetRecords.data[0].withdrawal_otp == otp){
+          let updateObj = {
+            balance: '0'
+          }
+          let updateQ = `UPDATE wallet
+          SET balance = 0
+          WHERE user_id = ${checkToken.id};
+          `;
+          let updateRecords = await common.customQuery(updateQ)
+          
+          if (updateRecords){
+            let response = {
+              status : 200,
+              msg : 'Your request for Withdrawal coin is successfully submitted.',
+              
+  
+            }
+            res.send(response)
+          }else{
+            let response = {
+              status : 500,
+              msg : 'Something went wrong.'
+            }
+            res.send(response)
+
+          }
+          
+        }else{
+          let response = {
+            status : 500,
+            msg : 'Incorrect OTP'
+          }
+          res.send(response)
+        }
+        
+      }else{
+        res.send(response.UnauthorizedUser(checkToken))
+      }
+      } catch (error) {
      res.send(error);
   }
 };

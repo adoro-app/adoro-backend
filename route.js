@@ -211,6 +211,17 @@ router.get("/getWalletBalance",  (req, res) => {
 router.get("/changeNotificationStatus",  (req, res) => {
     User.changeNotificationStatus(req,res)
 });
+
+router.get("/getResult",  (req, res) => {
+    User.getResult(req,res)
+});
+
+router.get("/send_withdrawal_otp",  (req, res) => {
+    User.send_withdrawal_otp(req,res)
+});
+router.post("/validateWithdrawOTP",  (req, res) => {
+    User.validateWithdrawOTP(req,res)
+});
 //payment
 
 // router.post("/orders", async (req, res) => {

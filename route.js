@@ -222,6 +222,9 @@ router.get("/send_withdrawal_otp",  (req, res) => {
 router.post("/validateWithdrawOTP",  (req, res) => {
     User.validateWithdrawOTP(req,res)
 });
+router.get("/getCompletedCampaign",  (req, res) => {
+    campaign.getCompletedCampaign(req,res)
+});
 //payment
 
 // router.post("/orders", async (req, res) => {

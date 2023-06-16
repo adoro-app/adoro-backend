@@ -13,6 +13,7 @@ const moment = require('moment-timezone');
 const AWS = require('aws-sdk'); 
 
 
+
 const s3 = new AWS.S3({
   accessKeyId: config.AWS_CREDENTIAL.accessKeyId,
   secretAccessKey: config.AWS_CREDENTIAL.secretAccessKey
@@ -200,4 +201,28 @@ const s3 = new AWS.S3({
           }
          
     }
-   
+    exports.getCompletedCampaign = async (req, res) => {
+
+      try {
+        let resp = {};
+          let checkToken = await common.checkToken(req.headers);
+          if (checkToken.id) {
+              let getcampaigndetails = await common.GetRecords('campaign', '*', `status = 'completed' ORDER BY created_on DESC LIMIT 5`)
+              console.log(getcampaigndetails)
+              resp['campaigns'] = getcampaigndetails.data;
+              let getContestdetails =  await common.GetRecords('contests', '*', `status = 'completed' ORDER BY created_on DESC LIMIT 5`)
+              resp['contests'] = getContestdetails.data;
+              let response = {
+                status : 200,
+                msg : 'Successfull',
+                data : resp
+              }
+              res.send(response)
+          } else {
+              res.send(response.UnauthorizedUser(checkToken))
+          }
+      } catch (err) {
+          await res.send(err);
+      }
+  }
+  

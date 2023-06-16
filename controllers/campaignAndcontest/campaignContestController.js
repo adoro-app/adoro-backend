@@ -266,8 +266,10 @@ const s3 = new AWS.S3({
     exports.getCompletedCampaign = async (req, res) => {
 
       try {
+        console.log('dfffffffff')
         let resp = {};
           let checkToken = await common.checkToken(req.headers);
+          console.log('called')
           if (checkToken.id) {
               let getcampaigndetails = await common.GetRecords('campaign', '*', `status = 'completed' ORDER BY created_on DESC LIMIT 5`)
               console.log(getcampaigndetails)
@@ -287,17 +289,4 @@ const s3 = new AWS.S3({
           await res.send(err);
       }
   }
-  exports.getCompletedCampaign = async (req, res) => {
-
-    try {
-      let resp = {};
-        let checkToken = await common.checkToken(req.headers);
-        if (checkToken.id) {
-            let sqlQForResult = ``
-        } else {
-            res.send(response.UnauthorizedUser(checkToken))
-        }
-    } catch (err) {
-        await res.send(err);
-    }
-}
+  

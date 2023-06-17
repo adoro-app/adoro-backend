@@ -32,6 +32,7 @@ exports.postComment = async (req, res)=>{
                     created_on:currentDate
 
                 }
+                
                 let addRecord = await common.AddRecords('comments', addobj )
                 if(addRecord ){
                     let sqlForGetUserDeviceToken = `SELECT u.device_token, u.id , notification

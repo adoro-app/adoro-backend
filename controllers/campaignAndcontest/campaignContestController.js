@@ -11,7 +11,9 @@ const multer = require('multer');
 path = require('path');
 const moment = require('moment-timezone');
 const AWS = require('aws-sdk'); 
-
+const imageMemeAmount = 250;
+const GifMemeAmount = 500;
+const videoMemeAmount = 1000; 
 
 
 const s3 = new AWS.S3({
@@ -266,15 +268,14 @@ const s3 = new AWS.S3({
     exports.getCompletedCampaign = async (req, res) => {
 
       try {
-        console.log('dfffffffff')
+       
         let resp = {};
           let checkToken = await common.checkToken(req.headers);
-          console.log('called')
           if (checkToken.id) {
-              let getcampaigndetails = await common.GetRecords('campaign', '*', `status = 'completed' ORDER BY created_on DESC LIMIT 5`)
+              let getcampaigndetails = await common.GetRecords('campaign', '*', `status = 'completed' ORDER BY created_on DESC LIMIT 10`)
               console.log(getcampaigndetails)
               resp['campaigns'] = getcampaigndetails.data;
-              let getContestdetails =  await common.GetRecords('contests', '*', `status = 'completed' ORDER BY created_on DESC LIMIT 5`)
+              let getContestdetails =  await common.GetRecords('contests', '*', `status = 'completed' ORDER BY created_on DESC LIMIT 10`)
               resp['contests'] = getContestdetails.data;
               let response = {
                 status : 200,
@@ -290,3 +291,113 @@ const s3 = new AWS.S3({
       }
   }
   
+  exports.getResults = async (req, res) => {
+
+    try {
+      let tag = (req.body.tag) ? req.body.tag : "";
+      let id = (req.body.id) ? req.body.id : "" ;
+      
+      let resp = {};
+        let checkToken = await common.checkToken(req.headers);
+        if (checkToken.id) {
+           if(tag != "" && id != ""){
+           
+            if (tag == 'campaign'){
+              let sql = `SELECT u.username, u.full_name, u.image, uac.media_type
+              FROM user_applied_campaign uac
+              JOIN users u ON u.id = uac.user_id
+              WHERE uac.campaign_id ='${id}'
+              AND uac.status = 'approved';
+              `
+              let executeQ = await common.customQuery(sql);
+              if (executeQ.data.length > 0){
+                for(let i = 0; i < executeQ.data.length; i++){
+                  if(executeQ.data[i].media_type == 'Image'){
+                    executeQ.data[i]['won_amount'] = imageMemeAmount;
+                  }else if(executeQ.data[i].media_type == 'Video'){
+                    executeQ.data[i]['won_amount'] = videoMemeAmount
+
+                  }else if (executeQ.data[i].media_type == 'Gif'){
+                    executeQ.data[i]['won_amount'] = GifMemeAmount
+                  }else{
+                    executeQ.data[i]['won_amount'] = 0
+                  }
+                }
+              }
+              let SortedData = await executeQ.data.sort((a, b) => b.won_amount - a.won_amount);
+              console.log(SortedData)
+              let response = {
+                status : 200,
+                msg : 'Successfull',
+                data : SortedData
+              }
+              res.send(response)
+
+            }else if (tag == 'contest'){
+
+              let sql = `SELECT
+              u.username,
+              u.full_name,
+              u.image,
+              uac.rank,
+              CASE uac.rank
+                WHEN 1 THEN c.first_award
+                WHEN 2 THEN c.second_award
+                WHEN 3 THEN c.third_award
+                ELSE NULL
+              END AS award_details
+            FROM
+              user_applied_contest uac
+              JOIN users u ON u.id = uac.user_id
+              JOIN contests c ON uac.contest_id = c.id
+            WHERE
+              uac.contest_id = '${id}'
+              AND uac.status = 'approved'
+              ORDER BY
+  uac.rank ASC;
+            
+              `
+              
+              let executeQ = await common.customQuery(sql);
+              
+              // let first_award = executeQ.data[0].first_award;
+              // let second_award = executeQ.data[0].second_award;
+              // let third_award = executeQ.data[0].third_award;
+              // for (let i = 0; i < executeQ.data.length; i++){
+              //   if(executeQ.data[i].rank == '1'){
+
+              //   }else if(executeQ.data[i].rank == '2'){
+
+              //   }else if(executeQ.data[i].rank == '3'){
+
+              //   }else{
+
+              //   }
+              // }
+              let response = {
+                status : 200,
+                msg : 'Successfull',
+                data : executeQ.data
+              }
+              res.send(response)
+
+            }else{
+
+            }
+
+           }else{ 
+            let response = {
+            status : 500,
+            msg : 'Missing Required Params.'
+            
+          }
+          res.send(response)
+
+           }
+        } else {
+            res.send(response.UnauthorizedUser(checkToken))
+        }
+    } catch (err) {
+        await res.send(err);
+    }
+}

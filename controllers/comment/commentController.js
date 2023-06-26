@@ -51,7 +51,7 @@ exports.postComment = async (req, res)=>{
                     `
                     let executeQu = await common.customQuery(sqlForGetUserName)
                     let senderUsername = executeQu.data[0].username;
-                   
+                  
                     if(device_token != '' && notification == 'true'){
                         
                             const notification = {
@@ -76,6 +76,7 @@ exports.postComment = async (req, res)=>{
                             acc[key] = String(value);
                             return acc;
                           }, {});
+                         
                           if(checkToken.id != uid){
                             let sendNotification = await common.sendNotification(message);
 
@@ -88,6 +89,7 @@ exports.postComment = async (req, res)=>{
                                 created_on: moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss')
             
                             }
+                           
                             let addRecord = await common.AddRecords('notification_history', addobject )
                      
                         
@@ -398,7 +400,9 @@ exports.updateComment = async (req, res)=>{
                             acc[key] = String(value);
                             return acc;
                           }, {});
+                          
                           if (checkToken.id != uid){
+                         
                             let sendNotification = await common.sendNotification(message);
                             let addobject ={
                                 title:message.notification.title,
@@ -409,6 +413,7 @@ exports.updateComment = async (req, res)=>{
                                 created_on: moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss')
             
                             }
+                          
                             let addRecord = await common.AddRecords('notification_history', addobject )
                            
                     

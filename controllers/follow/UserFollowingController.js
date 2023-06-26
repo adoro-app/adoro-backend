@@ -37,6 +37,7 @@ exports.sendFollowRequest = async (req, res)=>{
                         `
                        
                         let executeQ = await common.customQuery(sqlForGetUserDeviceToken)
+                        console.log(executeQ)
                         let uid = (executeQ.data[0].id) ? executeQ.data[0].id : ''
                         let notification = (executeQ.data[0].notification) ? executeQ.data[0].notification : ''
                        
@@ -45,7 +46,11 @@ exports.sendFollowRequest = async (req, res)=>{
                         id = ${checkToken.id}
                         `
                         let executeQu = await common.customQuery(sqlForGetUserName)
+                        // console.log(executeQu)
                         let senderUsername = executeQu.data[0].username;
+                        console.log(device_token)
+                        console.log(notification)
+                        console.log(device_token != '' && notification == 'true')
                         if(device_token != '' && notification == 'true'){
                             
                                const notification = {
@@ -82,6 +87,7 @@ exports.sendFollowRequest = async (req, res)=>{
                                     created_on: moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss')
                 
                                 }
+                                console.log(addobject)
                                 let addRecord = await common.AddRecords('notification_history', addobject )
                                
                         

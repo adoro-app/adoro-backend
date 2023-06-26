@@ -354,26 +354,13 @@ const s3 = new AWS.S3({
               uac.contest_id = '${id}'
               AND uac.status = 'approved'
               ORDER BY
-  uac.rank ASC;
+              uac.rank ASC;
             
               `
               
               let executeQ = await common.customQuery(sql);
               
-              // let first_award = executeQ.data[0].first_award;
-              // let second_award = executeQ.data[0].second_award;
-              // let third_award = executeQ.data[0].third_award;
-              // for (let i = 0; i < executeQ.data.length; i++){
-              //   if(executeQ.data[i].rank == '1'){
-
-              //   }else if(executeQ.data[i].rank == '2'){
-
-              //   }else if(executeQ.data[i].rank == '3'){
-
-              //   }else{
-
-              //   }
-              // }
+              
               let response = {
                 status : 200,
                 msg : 'Successfull',

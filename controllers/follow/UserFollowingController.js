@@ -77,6 +77,7 @@ exports.sendFollowRequest = async (req, res)=>{
                                     title:message.notification.title,
                                     message:message.notification.body,
                                     user_id : uid,
+                                    data_id : checkToken.id,
                                     
                                     created_on: moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss')
                 
@@ -170,6 +171,7 @@ exports.sendFollowRequest = async (req, res)=>{
                             let addobject ={
                                 title:'Request Accepted',
                                 message:message.notification.body,
+                                data_id : checkToken.id,
                                 created_on: moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss')
             
                             }

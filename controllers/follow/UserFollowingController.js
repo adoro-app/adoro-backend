@@ -228,7 +228,7 @@ exports.sendFollowRequest = async (req, res)=>{
                      deleteRecord = await common.deleteRecords('follower', `user_id = ${checkToken.id} AND follower_user_id = ${id}` )
                      let deleteNotiHistory = await common.deleteRecords('notification_history',`user_id = ${checkToken.id} AND data_id = ${id}`)
                 }else{
-                    deleteRecord = await common.deleteRecords('follower', `user_id = ${id} AND follower_user_id = ${checkToken.id}` )
+                    deleteRecord = await common.deleteRecords('follower', `user_id = ${checkToken.id} AND follower_user_id = ${id}` )
                 }
                 
                 if(deleteRecord ){

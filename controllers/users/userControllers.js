@@ -461,79 +461,95 @@ exports.noteFromAdoro = async (req, res) => {
   }
 }
 
+function groupByDataId(data) {
+  const groupedData = {};
+  
+  data.forEach(item => {
+    const { data_id } = item;
+    
+    if (groupedData[data_id]) {
+      groupedData[data_id].push(item);
+    } else {
+      if (data_id) {
+        groupedData[data_id] = [item];
+      } else {
+        groupedData[data_id] = [item];
+      }
+    }
+  });
+
+  // Convert the object into an array of arrays
+  const result = Object.values(groupedData);
+
+  return result;
+}
+
+
+// Controller function to get notifications
 exports.getNotification = async (req, res) => {
-  // console.log(req.query)
-  try{
+  try {
     let response = {};
     let checkToken = await common.checkToken(req.headers);
-      if(checkToken.id){
-        let sql = `SELECT *
+
+    if (checkToken.id) {
+      let sql = `SELECT *
         FROM notification_history
         WHERE user_id = ${checkToken.id}
           AND created_on >= DATE_SUB(NOW(), INTERVAL 1 WEEK)
           AND title = 'Follow Request'
-        
-        `
-       
-        let fetchpostdetails = await common.customQuery(sql);
-        
-        response['follow_request'] = fetchpostdetails.data;
+        ORDER BY created_on DESC`;
 
-        let sqlForAcceptRequest = `SELECT *
+      let fetchPostDetails = await common.customQuery(sql);
+      response['follow_request'] = fetchPostDetails.data;
+
+      let sqlForAcceptRequest = `SELECT *
         FROM notification_history
         WHERE user_id = ${checkToken.id}
           AND created_on >= DATE_SUB(NOW(), INTERVAL 1 WEEK)
           AND title = 'Request Accepted'
-        
-        `
-       
-        let fetchacceptReqdetails = await common.customQuery(sqlForAcceptRequest);
-        response['aceept_request'] = await fetchacceptReqdetails.data;
+        ORDER BY created_on DESC`;
 
-        let sqlForComment = `SELECT *
+      let fetchAcceptReqDetails = await common.customQuery(sqlForAcceptRequest);
+      response['accept_request'] = fetchAcceptReqDetails.data;
+
+      let sqlForComment = `SELECT *
         FROM notification_history
         WHERE user_id = ${checkToken.id}
           AND created_on >= DATE_SUB(NOW(), INTERVAL 1 WEEK)
           AND title = 'Comment'
-        
-        `
-       
-        let fetchcommentdetails = await common.customQuery(sqlForComment);
-        response['comments'] = fetchpostdetails.data;
+        ORDER BY created_on DESC`;
 
-        let sqlForLike = `SELECT *
+      let fetchCommentDetails = await common.customQuery(sqlForComment);
+      response['comments'] = fetchCommentDetails.data;
+
+      let sqlForLike = `SELECT *
         FROM notification_history
         WHERE user_id = ${checkToken.id}
           AND created_on >= DATE_SUB(NOW(), INTERVAL 1 WEEK)
           AND title = 'Like'
-        
-        `
-       
-        let fetchlikeDtails = await common.customQuery(sqlForLike);
-        response['likes'] = fetchlikeDtails.data;
-        
-        let resData = {
-          status : 200,
-          data : response
-         
-        }
-        
-        await res.send(resData);
-        
-       
-      
-     
-      
-      }else{
-        res.send(response.UnauthorizedUser(checkToken))
-      }
-      
+        ORDER BY created_on DESC`;
 
-  }catch(err){
+      let fetchLikeDetails = await common.customQuery(sqlForLike);
+      response['likes'] = fetchLikeDetails.data;
+
+      let resData = {
+        status: 200,
+        data: {
+          follow_request: response.follow_request,
+          accept_request: response.accept_request,
+          comments: groupByDataId(response.comments),
+          likes: groupByDataId(response.likes)
+        }
+      };
+
+      await res.send(resData);
+    } else {
+      res.send(response.UnauthorizedUser(checkToken));
+    }
+  } catch (err) {
     await res.send(err);
   }
-}
-
+};
 exports.search = async (req, res) => {
   // console.log(req.query)
   try{

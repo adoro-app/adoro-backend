@@ -182,7 +182,7 @@ exports.sendFollowRequest = async (req, res)=>{
                                 created_on: moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss')
             
                             }
-                            let addRecord = await common.acceptFollowReq('notification_history', addobject, `user_id = ${uid}` )
+                            let addRecord = await common.AddRecords('notification_history', addobject )
                             let deleteRecordsFromNH = await common.deleteRecords('notification_history',`user_id = '${checkToken.id}' AND data_id = '${uid}'`)
                     
                         

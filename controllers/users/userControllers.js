@@ -492,12 +492,13 @@ exports.getNotification = async (req, res) => {
     let checkToken = await common.checkToken(req.headers);
 
     if (checkToken.id) {
-      let sql = `SELECT *
-        FROM notification_history
-        WHERE user_id = ${checkToken.id}
-          AND created_on >= DATE_SUB(NOW(), INTERVAL 1 WEEK)
-         
-        ORDER BY created_on DESC`;
+      let sql = `SELECT nh.*, u.username, u.full_name, u.image
+      FROM notification_history nh
+      LEFT JOIN users u ON nh.title = 'Follow Request' AND nh.data_id = u.id
+      WHERE nh.user_id = '${checkToken.id}'
+        AND nh.created_on >= DATE_SUB(NOW(), INTERVAL 1 WEEK)
+      ORDER BY nh.created_on DESC;
+      `;
 
       let fetchPostDetails = await common.customQuery(sql);
       let resData = {

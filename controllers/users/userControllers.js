@@ -464,31 +464,61 @@ exports.noteFromAdoro = async (req, res) => {
 exports.getNotification = async (req, res) => {
   // console.log(req.query)
   try{
+    let response = {};
     let checkToken = await common.checkToken(req.headers);
       if(checkToken.id){
-        let sql = `SELECT * FROM notification_history
-        WHERE user_id = ${checkToken.id} AND created_on >= DATE_SUB(NOW(), INTERVAL 1 WEEK);
+        let sql = `SELECT *
+        FROM notification_history
+        WHERE user_id = ${checkToken.id}
+          AND created_on >= DATE_SUB(NOW(), INTERVAL 1 WEEK)
+          AND title = 'Follow Request'
+        
         `
-       console.log(sql)
+       
         let fetchpostdetails = await common.customQuery(sql);
-        console.log(fetchpostdetails)
-        if(fetchpostdetails.data.length > 0){
-          let response = {
-            status : 200,
-            msg : 'notification found.',
-            data : fetchpostdetails.data
-           
-          }
-          await res.send(response);
-        }else{
-          let response = {
-            status : 500,
-            msg : 'notification Not found.'
-           
-          }
-          await res.send(response);
+        
+        response['follow_request'] = fetchpostdetails.data;
+
+        let sqlForAcceptRequest = `SELECT *
+        FROM notification_history
+        WHERE user_id = ${checkToken.id}
+          AND created_on >= DATE_SUB(NOW(), INTERVAL 1 WEEK)
+          AND title = 'Request Accepted'
+        
+        `
+       
+        let fetchacceptReqdetails = await common.customQuery(sqlForAcceptRequest);
+        response['aceept_request'] = await fetchacceptReqdetails.data;
+
+        let sqlForComment = `SELECT *
+        FROM notification_history
+        WHERE user_id = ${checkToken.id}
+          AND created_on >= DATE_SUB(NOW(), INTERVAL 1 WEEK)
+          AND title = 'Comment'
+        
+        `
+       
+        let fetchcommentdetails = await common.customQuery(sqlForComment);
+        response['comments'] = fetchpostdetails.data;
+
+        let sqlForLike = `SELECT *
+        FROM notification_history
+        WHERE user_id = ${checkToken.id}
+          AND created_on >= DATE_SUB(NOW(), INTERVAL 1 WEEK)
+          AND title = 'Like'
+        
+        `
+       
+        let fetchlikeDtails = await common.customQuery(sqlForLike);
+        response['likes'] = fetchlikeDtails.data;
+        
+        let resData = {
+          status : 200,
+          data : response
+         
         }
         
+        await res.send(resData);
         
        
       

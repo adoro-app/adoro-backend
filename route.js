@@ -75,9 +75,9 @@ router.post("/acceptFollowRequest",  (req, res) => {
 router.post("/deleteFollowRequest",  (req, res) => {
     follow.deleteFollowRequest(req,res)
 });
-router.post("/deleteFollowRequest",  (req, res) => {
-    follow.deleteFollowRequest(req,res)
-});
+// router.post("/deleteFollowRequest",  (req, res) => {
+//     follow.deleteFollowRequest(req,res)
+// });
 router.get("/getFollowerList",  (req, res) => {
     follow.getFollowerList(req,res)
 });

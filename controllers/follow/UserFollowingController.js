@@ -177,12 +177,13 @@ exports.sendFollowRequest = async (req, res)=>{
                             let addobject ={
                                 title:'Request Accepted',
                                 message:message.notification.body,
+                                user_id:uid,
                                 data_id : checkToken.id,
                                 created_on: moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss')
             
                             }
                             let addRecord = await common.acceptFollowReq('notification_history', addobject, `user_id = ${uid}` )
-                           
+                            let deleteRecordsFromNH = await common.deleteRecords('notification_history',`user_id = '${checkToken.id}' AND data_id = '${uid}'`)
                     
                         
                     }
@@ -225,7 +226,7 @@ exports.sendFollowRequest = async (req, res)=>{
                      deleteRecord = await common.deleteRecords('follower', `user_id = ${id} AND follower_user_id = ${checkToken.id}` )
                 }if(flag == 'delete'){
                      deleteRecord = await common.deleteRecords('follower', `user_id = ${checkToken.id} AND follower_user_id = ${id}` )
-                     let deleteNotiHistory = await common.deleteRecords('notification_history',`user_id = ${checkToken.id}`)
+                     let deleteNotiHistory = await common.deleteRecords('notification_history',`user_id = ${checkToken.id} AND data_id = ${id}`)
                 }else{
                     deleteRecord = await common.deleteRecords('follower', `user_id = ${id} AND follower_user_id = ${checkToken.id}` )
                 }

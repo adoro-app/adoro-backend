@@ -496,53 +496,47 @@ exports.getNotification = async (req, res) => {
         FROM notification_history
         WHERE user_id = ${checkToken.id}
           AND created_on >= DATE_SUB(NOW(), INTERVAL 1 WEEK)
-          AND title = 'Follow Request'
+         
         ORDER BY created_on DESC`;
 
       let fetchPostDetails = await common.customQuery(sql);
-      response['follow_request'] = fetchPostDetails.data;
-
-      let sqlForAcceptRequest = `SELECT *
-        FROM notification_history
-        WHERE user_id = ${checkToken.id}
-          AND created_on >= DATE_SUB(NOW(), INTERVAL 1 WEEK)
-          AND title = 'Request Accepted'
-        ORDER BY created_on DESC`;
-
-      let fetchAcceptReqDetails = await common.customQuery(sqlForAcceptRequest);
-      response['accept_request'] = fetchAcceptReqDetails.data;
-
-      let sqlForComment = `SELECT *
-        FROM notification_history
-        WHERE user_id = ${checkToken.id}
-          AND created_on >= DATE_SUB(NOW(), INTERVAL 1 WEEK)
-          AND title = 'Comment'
-        ORDER BY created_on DESC`;
-
-      let fetchCommentDetails = await common.customQuery(sqlForComment);
-      response['comments'] = fetchCommentDetails.data;
-
-      let sqlForLike = `SELECT *
-        FROM notification_history
-        WHERE user_id = ${checkToken.id}
-          AND created_on >= DATE_SUB(NOW(), INTERVAL 1 WEEK)
-          AND title = 'Like'
-        ORDER BY created_on DESC`;
-
-      let fetchLikeDetails = await common.customQuery(sqlForLike);
-      response['likes'] = fetchLikeDetails.data;
-
       let resData = {
         status: 200,
-        data: {
-          follow_request: response.follow_request,
-          accept_request: response.accept_request,
-          comments: groupByDataId(response.comments),
-          likes: groupByDataId(response.likes)
-        }
+        data: fetchPostDetails.data
       };
 
       await res.send(resData);
+      // let sqlForAcceptRequest = `SELECT *
+      //   FROM notification_history
+      //   WHERE user_id = ${checkToken.id}
+      //     AND created_on >= DATE_SUB(NOW(), INTERVAL 1 WEEK)
+      //     AND title = 'Request Accepted'
+      //   ORDER BY created_on DESC`;
+
+      // let fetchAcceptReqDetails = await common.customQuery(sqlForAcceptRequest);
+      // response['accept_request'] = fetchAcceptReqDetails.data;
+
+      // let sqlForComment = `SELECT *
+      //   FROM notification_history
+      //   WHERE user_id = ${checkToken.id}
+      //     AND created_on >= DATE_SUB(NOW(), INTERVAL 1 WEEK)
+      //     AND title = 'Comment'
+      //   ORDER BY created_on DESC`;
+
+      // let fetchCommentDetails = await common.customQuery(sqlForComment);
+      // response['comments'] = fetchCommentDetails.data;
+
+      // let sqlForLike = `SELECT *
+      //   FROM notification_history
+      //   WHERE user_id = ${checkToken.id}
+      //     AND created_on >= DATE_SUB(NOW(), INTERVAL 1 WEEK)
+      //     AND title = 'Like'
+      //   ORDER BY created_on DESC`;
+
+      // let fetchLikeDetails = await common.customQuery(sqlForLike);
+      // response['likes'] = fetchLikeDetails.data;
+
+      
     } else {
       res.send(response.UnauthorizedUser(checkToken));
     }

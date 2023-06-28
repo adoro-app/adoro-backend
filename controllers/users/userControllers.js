@@ -494,7 +494,7 @@ exports.getNotification = async (req, res) => {
     if (checkToken.id) {
       let sql = `SELECT nh.*, u.username, u.full_name, u.image
       FROM notification_history nh
-      LEFT JOIN users u ON nh.title = 'Follow Request' AND nh.data_id = u.id
+      LEFT JOIN users u ON (nh.title = 'Follow Request' OR nh.title = 'Request Accepted') AND nh.data_id = u.id
       WHERE nh.user_id = '${checkToken.id}'
         AND nh.created_on >= DATE_SUB(NOW(), INTERVAL 1 WEEK)
       ORDER BY nh.created_on DESC;

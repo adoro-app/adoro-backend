@@ -367,7 +367,13 @@ exports.getPostById = async (req, res) => {
 }
 async function preparedata(getdata){
   try{
-    let sqlForFetchLikes = `SELECT post.id, users.id, users.username, users.full_name, users.image FROM post LEFT JOIN likes ON post.id = likes.post_id LEFT JOIN users on likes.user_id = users.id WHERE post.id = ${getdata.id}`;
+    let sqlForFetchLikes = `SELECT post.id, users.id, users.username, users.full_name, users.image
+    FROM post
+    LEFT JOIN likes ON post.id = likes.post_id
+    LEFT JOIN users ON likes.user_id = users.id
+    WHERE post.id = ${getdata.id}
+    AND likes.post_id IS NOT NULL
+    `;
     // console.log(sqlForFetchLikes)
     let FetchLikes = await common.customQuery(sqlForFetchLikes);
     
@@ -400,7 +406,8 @@ exports.support = async (req,res) =>
             full_name: full_name,
             email : email,
             message:message,
-            user_id : checkToken.id
+            user_id : checkToken.id,
+            created_on : moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss')
         }
           let addRecords = await common.AddRecords('support', insertObj )
           if(addRecords){
@@ -435,7 +442,7 @@ exports.noteFromAdoro = async (req, res) => {
     let checkToken = await common.checkToken(req.headers);
       if(checkToken.id){
         let sql = `SELECT * FROM notefromadoro
-        WHERE created_on >= DATE_SUB(NOW(), INTERVAL 1 WEEK);
+        
         `
        
         let fetchpostdetails = await common.customQuery(sql);

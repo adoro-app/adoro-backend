@@ -397,9 +397,9 @@ exports.like = async (req, res)=>{
     exports.deletePost = async (req, res)=>{
         try{
            
-            let checkToken = await common.checkToken(req.headers);
+            // let checkToken = await common.checkToken(req.headers);
             
-            if(checkToken.id){
+            // if(checkToken.id){
                 let post_id = req.body.post_id;
                 let deleteLike = await common.deleteRecords('post',`id = ${post_id}`);
                 
@@ -416,9 +416,9 @@ exports.like = async (req, res)=>{
                     }
                     res.send(response)
                 }
-            }else{
-                res.send(response.UnauthorizedUser(checkToken))
-            }
+            // }else{
+            //     res.send(response.UnauthorizedUser(checkToken))
+            // }
                 
         }catch(err){
             throw err;

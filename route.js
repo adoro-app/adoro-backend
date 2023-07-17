@@ -138,6 +138,9 @@ router.post("/postComment",  (req, res) => {
 router.post("/deleteComment",  (req, res) => {
     comment.deleteComment(req,res)
 });
+router.post("/deletePost",  (req, res) => {
+    post.deletePost(req,res)
+});
 router.post("/updateComment",  (req, res) => {
     comment.updateComment(req,res)
 });
